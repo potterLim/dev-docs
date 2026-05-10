@@ -597,8 +597,9 @@ public void SaveOrder(Order order, ESaveMode saveMode);
 ### 5.6. 입력 검증 규칙
 
 - 외부 입력은 시스템 경계에서 검증한다.
-- 검증 실패 시 가능한 빨리 반환한다.
+- 검증 실패는 시스템 경계에서 즉시 처리한다.
 - 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
+- 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
 
 좋은 예:
 
@@ -656,13 +657,7 @@ public Coupon? GetCouponOrNull(string? couponCodeOrNull)
 
 public IReadOnlyList<Order> GetOrders(CustomerID customerID)
 {
-    IReadOnlyList<Order>? ordersOrNull = mOrderRepository.GetOrdersOrNull(customerID);
-    if (ordersOrNull == null)
-    {
-        return Array.Empty<Order>();
-    }
-
-    return ordersOrNull;
+    return mOrderRepository.GetOrders(customerID);
 }
 ```
 
