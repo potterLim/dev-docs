@@ -425,7 +425,7 @@ if (order.hasDiscountCoupon()) {
 
 ```java
 public User search(String userId);
-public List<User> search(String keyword);
+public List<User> search(SearchKeyword keyword);
 ```
 
 좋은 예:
@@ -438,9 +438,9 @@ public List<User> searchByKeyword(SearchKeyword searchKeyword);
 ### 6.3. 입력 검증 규칙
 
 - 외부 입력은 시스템 경계에서 검증한다.
-- 검증 실패 시 가능한 빨리 반환한다.
+- 검증 실패는 시스템 경계에서 즉시 처리한다.
 - 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
-- 필수 매개 변수가 `null`이면 즉시 반환한다.
+- 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
 
 좋은 예:
 
@@ -755,12 +755,7 @@ public List<Order> findOrdersOrNull(UserId userId);
 public String getDisplayNameOrNull();
 
 public List<Order> findOrdersByUserId(UserId userId) {
-    List<Order> orders = mOrderRepository.findByUserId(userId);
-    if (orders.isEmpty()) {
-        return Collections.emptyList();
-    }
-
-    return orders;
+    return mOrderRepository.findByUserId(userId);
 }
 ```
 
