@@ -9,7 +9,7 @@
   - 코드는 주석 없이도 최대한 의도를 이해할 수 있어야 한다.
   - 복잡한 로직은 트릭보다 명확한 표현을 우선한다.
 - 특별한 이유가 없는 한 IDE의 자동 서식 규칙을 따른다.
-  - Visual Studio의 `Format Document(문서 서식 지정)` 기능을 기본으로 사용한다.
+  - Visual Studio의 `Code Cleanup(코드 정리)` 기능을 기본으로 사용한다.
   - 개인 취향보다 팀 전체의 일관성을 우선한다.
 - 이름은 역할과 의도를 드러내야 한다.
   - 축약어, 애매한 약어, 임의의 줄임말보다 명확한 이름을 사용한다.
@@ -21,7 +21,7 @@
   - 외부 입력은 시스템 경계에서 검증한다.
   - 내부 로직은 검증된 값과 도메인 자료형을 받도록 구성한다.
 
-이 코딩 표준은 다음 코딩 표준들을 참고하되, 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
+이 코딩 표준은 다음 자료를 참고하되, 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
 
 - [언리얼 엔진 4 코딩 표준](https://docs.unrealengine.com/latest/INT/Programming/Development/CodingStandard/)
 - [둠 3 코드 스타일과 규칙](ftp://ftp.idsoftware.com/idstuff/doom3/source/codestyleconventions.doc)
@@ -145,12 +145,14 @@ OrderEditorViewModel.Navigation.cs
 
 ### 3.1. 클래스, 인터페이스, 구조체, 열거형 이름 규칙
 
-- 클래스와 구조체는 `PascalCase`를 사용한다.
+- 클래스는 `PascalCase`를 사용한다.
+- 클래스 이름은 명사 또는 명사구로 작성한다.
 - 인터페이스는 `PascalCase`를 사용하며, 이름 앞에 `I` 접두어를 사용한다.
 - 열거형은 `PascalCase`를 사용하며, 이름 앞에 `E` 접두어를 사용한다.
 - 구조체는 `PascalCase`를 사용하며, 이름 앞에 `S` 접두어를 사용한다.
-  - 단, `readonly struct`일 때는 그렇지 않다.
+  - 단, `readonly struct`에는 `S` 접두어를 붙이지 않는다.
 - 비트 플래그나 권한 조합처럼 플래그 성격의 열거형에는 `Flags` 접미사를 붙인다.
+- 열거형 멤버는 `PascalCase`를 사용한다.
 
 좋지 않은 예:
 
@@ -205,7 +207,7 @@ public enum EPermissionFlags
 - 가능하면 `동사 + 목적어` 형태로 작성한다.
 - 반환값이 있는 메서드는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 메서드는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
-  - 그러는 것이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
+  - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
 - 재귀 메서드는 이름 끝에 `Recursive`를 붙인다.
 - `public` 메서드 이름은 `PascalCase`를 사용한다.
 - `public` 메서드가 아닌 경우 `camelCase`를 사용한다.
@@ -357,7 +359,8 @@ public string ApiKey { get; private set; }
 - 공개 메서드가 먼저 보이도록 배치한다.
 - 필요에 따라 관련된 멤버끼리 논리적으로 묶어 배치할 수 있다.
 - `private` 헬퍼 메서드는 이를 사용하는 `public` 메서드 아래쪽에 배치한다.
-- 멤버 변수도 연관 있는 것끼리 그룹을 짓는다.
+- 오버로드된 메서드는 서로 떨어뜨리지 않고 함께 배치한다.
+- 멤버 변수는 연관 있는 것끼리 그룹으로 묶는다.
 
 좋은 예:
 
@@ -461,7 +464,7 @@ public class UserProfile
 ```cs
 public class UserProfile
 {
-    public string DisplayName { get; set; } = string.Empty;
+    public string DisplayName { get; private set; } = string.Empty;
 }
 ```
 
@@ -483,6 +486,8 @@ public class UserProfile
 
 - 초기화 후 값이 변하지 않는 변수는 `readonly`로 선언한다.
 - 프로퍼티에 `private init`(C# 9.0)을 최대한 사용한다.
+- 객체 초기자(object initializer)는 지양한다.
+  - 단, `required` 한정자(C# 11.0)와 초기화 전용 setter(C# 9.0)로 불변 객체를 구성할 때는 허용한다.
 
 좋은 예:
 
@@ -499,6 +504,23 @@ public class Account
         mPasswordHash = passwordHash;
         EmailAddress = emailAddress;
         mUserRepository = userRepository;
+    }
+}
+```
+
+### 5.4. 싱글턴과 `static` 클래스 규칙
+
+- 싱글턴 패턴 대신 정적(`static`) 클래스를 사용한다.
+- 상태를 보관해야 하거나 의존성이 필요한 경우에는 `static` 클래스보다 일반 클래스를 사용한다.
+
+좋은 예:
+
+```cs
+public static class DateTimeUtility
+{
+    public static DateTime GetStartOfDay(DateTime dateTime)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
     }
 }
 ```
@@ -532,7 +554,30 @@ public decimal GetDiscountedPrice(Order order, DiscountRate discountRate)
 }
 ```
 
-### 6.2. 메서드 오버로딩 규칙
+### 6.2. 긴 표현식 분리 규칙
+
+- 인덱스, 오프셋, 크기, 좌표 계산처럼 여러 의미가 섞인 계산을 하나의 표현식에 몰아넣지 않는다.
+- 표현식이 길어지면 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
+- 중간 변수 이름은 계산 방식보다 값의 의미를 드러내야 한다.
+- 단순히 줄 길이를 줄이기 위한 `temp`, `value`, `result` 같은 이름은 사용하지 않는다.
+- 한눈에 이해되는 단순 표현식은 불필요하게 나누지 않는다.
+
+좋지 않은 예:
+
+```cs
+int sourceByteIndex = (region.Y + y) * bytesPerRow + (region.X + x) * channelCount + channelIndex;
+```
+
+좋은 예:
+
+```cs
+int sourceRowOffset = (region.Y + y) * bytesPerRow;
+int sourceColumnOffset = (region.X + x) * channelCount;
+
+int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
+```
+
+### 6.3. 메서드 오버로딩 규칙
 
 - 매개 변수 자료형만 다른 모호한 오버로딩은 지양한다.
 - 이름만으로도 동작 차이가 드러나야 한다.
@@ -552,7 +597,7 @@ public InvoiceAttachment GetAttachmentByIndex(int index);
 public InvoiceAttachment GetAttachmentByFileName(string fileName);
 ```
 
-### 6.3. 기본 매개 변수 규칙
+### 6.4. 기본 매개 변수 규칙
 
 - 기본 매개 변수 대신 메서드 오버로딩을 선호한다.
 - 기본 매개 변수를 사용하는 경우 `null`, `false`, `0` 같이 비트 패턴이 0인 값을 사용한다.
@@ -586,7 +631,7 @@ public IReadOnlyList<Order> GetOrders(CustomerID customerID, int pageNumber = 0)
 }
 ```
 
-### 6.4. 변수 가리기 금지
+### 6.5. 변수 가리기 금지
 
 - 변수 가리기(variable shadowing)는 허용하지 않는다.
 - 외부 변수가 동일한 이름을 사용 중이라면 내부 변수에는 다른 이름을 사용한다.
@@ -629,13 +674,33 @@ public class InvoiceService
 }
 ```
 
-### 6.5. 강타입 매개 변수 설계 규칙
+### 6.6. `out` 매개 변수 선언 규칙
+
+- 메서드에 전달하는 `out` 매개 변수는 별도의 줄에서 먼저 선언한다.
+- 인수 목록 안에서 `out` 변수를 선언하지 않는다.
+- `out` 변수 이름은 반환되는 값의 의미를 드러내야 한다.
+
+좋지 않은 예:
+
+```cs
+bool isParsed = int.TryParse(text, out int value);
+```
+
+좋은 예:
+
+```cs
+int parsedValue;
+bool isParsed = int.TryParse(text, out parsedValue);
+```
+
+### 6.7. 강타입 매개 변수 설계 규칙
 
 - 매개 변수는 가능한 한 강타입으로 받는다.
 - 의미를 암묵적으로 담은 `string`, `int`, `long`, `bool`의 직접 사용을 지양한다.
 - 정해진 선택지는 `enum`으로 표현한다.
 - 도메인 의미가 있는 값은 전용 자료형으로 감싸는 것을 우선 검토한다.
 - 전용 자료형은 가능한 한 불변으로 설계한다.
+- 범용적인 값을 강타입으로 만들 때는 `readonly record struct`(C# 10.0)를 우선 검토한다.
 - 관련된 여러 매개 변수는 별도의 객체로 묶는 것을 우선 검토한다.
 - 의미가 다른 동일 자료형 매개 변수를 나란히 받는 설계를 피한다.
 - `bool` 매개 변수는 호출부 가독성을 떨어뜨리므로 가능한 한 사용하지 않는다.
@@ -710,7 +775,20 @@ public enum ESaveMode
 public void SaveOrder(Order order, ESaveMode saveMode);
 ```
 
-### 6.6. 입력 검증 규칙
+### 6.8. 컬렉션 자료형 사용 규칙
+
+- `System.Collections`의 비제네릭 컬렉션보다 `System.Collections.Generic`의 제네릭 컬렉션을 사용한다.
+- 일반 배열을 사용하는 것도 허용한다.
+
+좋은 예:
+
+```cs
+List<Order> completedOrders = new List<Order>();
+Dictionary<UserID, User> usersByID = new Dictionary<UserID, User>();
+string[] fileNames = new string[10];
+```
+
+### 6.9. 입력 검증 규칙
 
 - 외부 입력은 시스템 경계에서 검증한다.
 - 검증 실패는 시스템 경계에서 즉시 처리한다.
@@ -737,43 +815,6 @@ private User? getUserByEmailOrNull(EmailAddress emailAddress)
 {
     Debug.Assert(string.IsNullOrWhiteSpace(emailAddress.Value) == false);
     return mUserRepository.GetByEmailOrNull(emailAddress);
-}
-```
-
-### 6.7. `null` 처리 규칙
-
-- 메서드의 매개 변수로 `null`을 받지 않도록 설계한다.
-  - 특히 `public` 메서드에서는 이 원칙을 우선한다.
-- `null` 값을 허용하는 매개 변수를 사용할 경우 변수 이름 뒤에 `OrNull`을 붙인다.
-- 메서드에서 `null`을 반환하지 않도록 설계한다.
-  - 특히 `public` 메서드에서는 이 원칙을 우선한다.
-  - 조회 실패처럼 정상 흐름으로 처리할 수 있는 경우에는 `null` 반환이 필요할 수도 있다.
-- 메서드에서 `null`을 반환할 때는 메서드 이름 뒤에 `OrNull`을 붙인다.
-- 컬렉션 반환값은 `null` 대신 빈 컬렉션을 반환한다.
-
-좋지 않은 예:
-
-```cs
-public Coupon GetCoupon(string? couponCodeOrNull);
-public IReadOnlyList<Order>? GetOrdersOrNull(CustomerID customerID);
-```
-
-좋은 예:
-
-```cs
-public Coupon? GetCouponOrNull(string? couponCodeOrNull)
-{
-    if (string.IsNullOrWhiteSpace(couponCodeOrNull))
-    {
-        return null;
-    }
-
-    return mCouponRepository.GetByCodeOrNull(couponCodeOrNull);
-}
-
-public IReadOnlyList<Order> GetOrders(CustomerID customerID)
-{
-    return mOrderRepository.GetOrders(customerID);
 }
 ```
 
@@ -852,6 +893,52 @@ switch (messageType)
 }
 ```
 
+### 7.3. 람다 사용 규칙
+
+- 인라인 람다는 한 줄짜리 짧은 코드로 제한한다.
+- 여러 작업을 수행하는 람다는 메서드나 명시적인 반복문으로 분리한다.
+
+좋지 않은 예:
+
+```cs
+orders.ForEach(order =>
+{
+    ReserveInventory(order);
+    SendOrderConfirmationEmail(order);
+});
+```
+
+좋은 예:
+
+```cs
+foreach (Order order in orders)
+{
+    ReserveInventory(order);
+    SendOrderConfirmationEmail(order);
+}
+```
+
+### 7.4. 리소스 해제 규칙
+
+- `using` 선언(C# 8.0)은 사용하지 않는다.
+- 리소스의 수명 범위가 코드 블록에 드러나도록 `using` 문을 사용한다.
+
+좋지 않은 예:
+
+```cs
+using StreamReader reader = new StreamReader(filePath);
+string fileContent = reader.ReadToEnd();
+```
+
+좋은 예:
+
+```cs
+using (StreamReader reader = new StreamReader(filePath))
+{
+    string fileContent = reader.ReadToEnd();
+}
+```
+
 ## 8. `assert` 사용 규칙
 
 - `Debug.Assert()`는 코드가 전제로 삼는 내부 불변식과 사전 조건을 확인할 때 사용한다.
@@ -869,32 +956,58 @@ public decimal CalculateAverageUnitPrice(Order order)
 }
 ```
 
-## 9. 주요 언어 기능 및 패턴 사용 규칙
+## 9. `null` 처리 규칙
 
-### 9.1. 컬렉션 사용 규칙
+- `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
+  - 호출자가 값을 전달하지 않을 수 있는 매개 변수에만 예외적으로 `null`을 허용한다.
+  - 값을 찾지 못한 상태를 반환값으로 알려야 하는 경우에만 예외적으로 `null`을 반환한다.
+- `null`을 허용하는 매개 변수와 `null`을 반환하는 메서드는 이름 뒤에 `OrNull`을 붙인다.
+- 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
+- `null` 병합 연산자(C# 2.0)는 사용하지 않는다.
 
-- `System.Collections`의 비제네릭 컬렉션보다 `System.Collections.Generic`의 제네릭 컬렉션을 사용한다.
-- 일반 배열을 사용하는 것도 허용한다.
+좋지 않은 예:
+
+```cs
+public Coupon GetCoupon(string? couponCodeOrNull);
+public IReadOnlyList<Order>? GetOrdersOrNull(CustomerID customerID);
+```
 
 좋은 예:
 
 ```cs
-List<Order> completedOrders = new List<Order>();
-Dictionary<UserID, User> usersByID = new Dictionary<UserID, User>();
-string[] fileNames = new string[10];
+public Coupon? GetCouponOrNull(string? couponCodeOrNull)
+{
+    if (string.IsNullOrWhiteSpace(couponCodeOrNull))
+    {
+        return null;
+    }
+
+    return mCouponRepository.GetByCodeOrNull(couponCodeOrNull);
+}
+
+public IReadOnlyList<Order> GetOrders(CustomerID customerID)
+{
+    return mOrderRepository.GetOrders(customerID);
+}
 ```
 
-### 9.2. `var` 사용 규칙
+## 10. `var` 사용 규칙
 
-- `var` 키워드를 사용하지 않는다.
-  - 단, LINQ 결과처럼 구체 자료형보다 처리 흐름이 중요한 경우에는 예외를 허용한다.
-  - `IEnumerable` 계열 LINQ 결과나 익명 타입이 대표적인 예이다.
+- `var` 키워드는 원칙적으로 사용하지 않는다.
+- 자료형이 우변에서 명확히 드러나는 경우에는 사용할 수 있다.
+- LINQ 결과처럼 명시할 자료형이 지나치게 길거나 익명 타입처럼 자료형을 직접 적을 수 없는 경우에도 `var`를 사용할 수 있다.
+- `foreach` 문에서는 반복 대상의 요소 의미가 분명할 때 `var`를 사용할 수 있다.
+- `new` 키워드 뒤에는 반드시 명시적으로 자료형을 적는다.
+  - 즉, C# 9.0의 `new()` 사용을 금지한다.
+  - 명시할 자료형이 없는 익명 타입은 메서드 내부에서만 예외적으로 허용한다.
 
 좋지 않은 예:
 
 ```cs
 var order = mOrderRepository.GetByID(orderID);
 var users = mUserRepository.GetAll();
+
+User user = new();
 ```
 
 좋은 예:
@@ -903,39 +1016,27 @@ var users = mUserRepository.GetAll();
 Order order = new Order();
 List<User> users = new List<User>();
 Dictionary<ProductID, Product> productsByID = new Dictionary<ProductID, Product>();
+
+User user = new User();
 ```
 
 허용 가능한 예외:
 
 ```cs
+var invoice = new Invoice();
+var ordersByID = new Dictionary<OrderID, Order>();
+
 var ordersByCustomerID = orders.GroupBy(order => order.CustomerID);
 
-var summary = new
+foreach (var order in pendingOrders)
 {
-    TotalCount = orders.Count,
-    TotalAmount = orders.Sum(order => order.TotalAmount),
-};
-```
-
-### 9.3. 싱글턴과 `static` 클래스 규칙
-
-- 싱글턴 패턴 대신에 정적(`static`) 클래스를 사용한다.
-
-좋은 예:
-
-```cs
-public static class DateTimeUtility
-{
-    public static DateTime GetStartOfDay(DateTime dateTime)
-    {
-        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
-    }
+    SubmitOrder(order);
 }
 ```
 
-### 9.4. `async` / `await` 규칙
+## 11. 비동기 처리 규칙
 
-- `async void` 대신에 `async Task`를 사용한다.
+- `async void` 대신 `async Task`를 사용한다.
   - `async void`가 허용되는 유일한 곳은 이벤트 핸들러이다.
 - `async` 메서드 이름에 `Async` 접미사를 붙이지 않는다.
 
@@ -967,66 +1068,14 @@ private async void handleSaveButtonClick(object sender, EventArgs e)
 }
 ```
 
-### 9.5. 최신 문법 사용 규칙
+## 12. 포맷팅 규칙
 
-- 인라인 람다는 한 줄짜리 짧은 코드로 제한한다.
-- 객체 초기자(object initializer)를 지양한다.
-  - 단, `required` 한정자(C# 11.0)와 초기화 전용 setter(C# 9.0)와 같이 사용할 때는 허용한다.
-- 메서드에 전달하는 `out` 매개 변수는 별도의 라인에 선언한다.
-  - 인수 목록 안에서 선언하지 않는다.
-- `null` 병합 연산자(C# 2.0)의 사용을 금한다.
-- `using` 선언(C# 8.0)의 사용을 금한다.
-  - 대신 `using` 문을 사용한다.
-- `new` 키워드 뒤에 반드시 명시적으로 자료형을 적는다.
-  - 즉, C# 9.0의 `new()` 사용을 금지한다.
-  - 단, 메서드 내부에서 익명 타입을 사용할 때는 허용한다.
-- 범용적인 값을 강타입(strong type)으로 만들 때는 `readonly record struct`(C# 10.0)를 사용한다.
-
-좋지 않은 예:
-
-```cs
-orders.ForEach(order =>
-{
-    ReserveInventory(order);
-    SendOrderConfirmationEmail(order);
-});
-
-using StreamReader reader = new StreamReader(filePath);
-
-bool isParsed = int.TryParse(text, out int value);
-
-User user = new();
-```
-
-좋은 예:
-
-```cs
-foreach (Order order in orders)
-{
-    PrintOrder(order);
-}
-
-using (StreamReader reader = new StreamReader(filePath))
-{
-    string fileContent = reader.ReadToEnd();
-}
-
-int value;
-bool isParsed = int.TryParse(text, out value);
-
-User user = new User();
-
-public readonly record struct OrderID(Guid Value);
-```
-
-## 10. 포맷팅 규칙
-
-### 10.1. 들여쓰기 규칙
+### 12.1. 들여쓰기 규칙
 
 - 탭(tab)은 Visual Studio 기본값을 사용한다.
 - Visual Studio를 사용하지 않을 때는 공백 4칸을 들여쓰기 기준으로 사용한다.
 
-### 10.2. 중괄호 사용 규칙
+### 12.2. 중괄호 사용 규칙
 
 - 중괄호(`{`)를 열 때는 언제나 새로운 줄에 연다.
 - 단일 실행문이어도 중괄호를 생략하지 않는다.
@@ -1046,7 +1095,7 @@ if (shouldCloseWindow)
 }
 ```
 
-### 10.3. 선언 규칙
+### 12.3. 선언 규칙
 
 - 한 줄에 변수 하나만 선언한다.
 
@@ -1063,124 +1112,25 @@ int counter = 0;
 int index = 0;
 ```
 
-## 11. 프로젝트 설정 규칙
-
-- 배포(release) 빌드에서 컴파일러 경고(warning)를 오류(error)로 처리하게 설정한다.
-- implicit global using 기능(C# 10.0)을 사용하지 않는다.
-- nullable context를 사용한다.
-
-## 12. 프레임워크 및 패턴별 규칙
-
-### 12.1. 자동 직렬화 (예: `System.Text.Json`)
-
-- 자동 직렬화에 사용할 데이터는 `class`로 정의한다.
-- 자동 직렬화용 `class` 파일에는 특정 직렬화 라이브러리 전용 애트리뷰트를 넣지 않는다.
-- 자동 직렬화용 `class`의 데이터는 언제나 `public` 자동 프로퍼티를 사용한다.
-  - 프로퍼티와 직렬화 데이터의 1:1 대응 관계를 유지한다.
-- 자동 직렬화용 `class`에 읽기 전용 프로퍼티가 필요한 경우, 그 대신 `public` 메서드를 만든다.
-- 자동 직렬화용 `class`의 `public` 생성자는 언제나 하나만 두며, 이 생성자는 매개 변수를 받지 않는다.
-- 자동 직렬화 메서드(예: `JsonSerializer.Serialize<>()`)를 직접 호출하지 않는다.
-  - 래퍼 메서드를 만들어 자동 직렬화 메서드에 넣을 수 있는 매개 변수의 자료형을 통제한다.
-
-좋은 예:
-
-```cs
-public class UserResponse
-{
-    public string DisplayName { get; set; } = string.Empty;
-    public string EmailAddress { get; set; } = string.Empty;
-
-    public UserResponse()
-    {
-    }
-
-    public bool HasEmailAddress()
-    {
-        return string.IsNullOrWhiteSpace(EmailAddress) == false;
-    }
-}
-```
-
-### 12.2. XAML 컨트롤
-
-- 컨트롤의 이름(예: `x:Name`)은 코드에서 직접 참조할 때만 만든다.
-- 컨트롤의 변수 이름 앞에는 `x`를 붙인다.
-- 컨트롤의 변수 이름 앞에는 컨트롤 종류도 붙인다.
-
-좋은 예:
-
-```cs
-xLabelUserName
-xButtonSubmit
-xTextBoxEmailAddress
-xGridLayoutRoot
-```
-
-### 12.3. ASP.NET Core
-
-- REST API의 요청 바디(request body)용 DTO(Data Transfer Object)를 만들 때, 각 입력 프로퍼티를 `nullable`로 선언하여 모델 유효성 검증(model validation)이 자동으로 이뤄지게 한다.
-
-좋은 예:
-
-```cs
-public class UpdateUserRequest
-{
-    [Required]
-    public Guid? UserID { get; set; }
-
-    [Required]
-    public string? DisplayName { get; set; }
-}
-```
-
-- 컨트롤러 메서드에서 요청을 처리할 때 가장 먼저 할 일은 입력값 검증이다.
-- 이 검증을 통과하면 모든 입력값은 유효한 것으로 간주한다.
-  - 따라서 `[Required]` 애트리뷰트가 달리고 `nullable`로 선언한 프로퍼티는 그 후부터 모두 `null`이 아니다.
-- 위 원칙과는 달리 `[FromRoute]`처럼 라우트에서 바인딩되는 매개 변수에는 `?`를 붙이지 않는다.
-
-좋은 예:
-
-```cs
-public UserResponse? GetUserOrNull([FromRoute] Guid userID)
-{
-    if (ModelState.IsValid == false)
-    {
-        return null;
-    }
-
-    User? userOrNull = mUserService.GetUserByIDOrNull(new UserID(userID));
-    if (userOrNull == null)
-    {
-        return null;
-    }
-
-    return mUserResponseFactory.Create(userOrNull);
-}
-```
-
-## 13. 주석 및 공개 API 문서화 규칙
+## 13. 주석 작성 규칙
 
 ### 13.1. 주석 작성 원칙
 
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
-- 주석은 가능한 한 가까운 코드 위에 둔다.
-- 오래 유지되어야 하는 정책이나 도메인 규칙은 주석보다 이름, 자료형, 메서드 구조로 먼저 표현한다.
+- 공개 API에는 호출자가 알아야 하는 계약이 있을 때만 문서 주석을 작성한다.
+- 문서 주석에는 매개 변수 제약, `null` 허용 여부, 반환값, 실패 시 동작처럼 호출자가 알아야 하는 내용을 적는다.
 - 임시 주석, 죽은 코드, 오래된 TODO는 남기지 않는다.
 - TODO에는 담당자나 추적 가능한 이슈 번호를 함께 적는다.
 
 좋지 않은 예:
 
 ```cs
-// Approves payment.
-ApprovePayment(paymentID);
-```
-
-TODO를 남겨야 하는 경우:
-
-```cs
-// TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
-PaymentResult paymentResult = mPaymentGateway.ApproveOrFallback(paymentRequest);
+// Checks whether the payment attempt was submitted recently.
+if (paymentAttempt.IsRecentlySubmitted(mClock.GetCurrentInstant()))
+{
+    return PaymentResult.DuplicateRequest();
+}
 ```
 
 좋은 예:
@@ -1193,91 +1143,22 @@ if (paymentAttempt.IsRecentlySubmitted(mClock.GetCurrentInstant()))
 }
 ```
 
-### 13.2. 공개 API 주석 규칙
-
-- 공개 API에는 필요한 경우 XML 문서 주석을 작성한다.
-- 메서드 이름과 시그니처만으로 충분히 분명하면 불필요한 문서 주석을 쓰지 않는다.
-- 호출자가 알아야 하는 계약을 문서 주석에 적는다.
-  - 매개 변수의 허용 범위
-  - `null` 허용 여부
-  - 반환값의 의미
-  - 실패 시 반환되는 값
-  - 호출 순서나 상태 제약
-  - 스레드 안전성
-- 내부 구현 방식이나 코드만 봐도 알 수 있는 내용은 문서 주석에 반복하지 않는다.
-- 문서 주석의 설명과 실제 코드가 달라지지 않도록, 동작을 바꾸면 문서 주석도 함께 수정한다.
-
-좋지 않은 예:
+TODO를 남겨야 하는 경우:
 
 ```cs
-/// <summary>
-/// Cancels an order.
-/// </summary>
-public bool CancelOrder(OrderID orderID)
-{
-    return cancelOrderInternal(orderID);
-}
+// TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
+PaymentResult paymentResult = mPaymentGateway.ApproveOrFallback(paymentRequest);
 ```
 
-좋은 예:
-
-```cs
-/// <summary>
-/// Cancels an order that has not been shipped.
-/// </summary>
-/// <param name="orderID">Order ID to cancel.</param>
-/// <returns>
-/// True if the order was canceled; false if the order was not found or already shipped.
-/// </returns>
-public bool CancelOrder(OrderID orderID)
-{
-    Order? orderOrNull = FindOrderOrNull(orderID);
-    if (orderOrNull == null || orderOrNull.IsShipped())
-    {
-        return false;
-    }
-
-    return orderOrNull.Cancel();
-}
-```
-
-### 13.3. 인라인 주석 규칙
+### 13.2. 인라인 주석 규칙
 
 - 인라인 주석은 줄 끝에 길게 붙이지 않는다.
 - 코드 위에 독립된 줄로 작성한다.
-- 조건이 복잡한 경우 주석보다 의미 있는 메서드로 먼저 분리한다.
 
 좋지 않은 예:
 
 ```cs
-if (shippingCalendar.IsWeekend(requestedDate)) // weekend is not supported
-{
-    return DeliveryEstimate.Unavailable();
-}
-```
-
-좋은 예:
-
-```cs
-// External shipment API treats weekends as non-business days.
-if (shippingCalendar.IsWeekend(requestedDate))
-{
-    return DeliveryEstimate.Unavailable();
-}
-```
-
-### 13.4. 주석보다 이름을 우선하는 규칙
-
-- 주석이 필요한 이유가 이름이 모호하기 때문이라면 이름을 먼저 고친다.
-- 조건식이 복잡해서 주석이 필요하다면 의미 있는 메서드로 분리한다.
-- 주석은 코드의 부족한 표현력을 보완하는 마지막 수단으로 사용한다.
-
-좋지 않은 예:
-
-```cs
-// Checks duplicate payment request.
-if (paymentAttempt.RequestedAt > mLastRequestedAt
-    && paymentAttempt.PaymentID == mLastPaymentID)
+if (paymentResponse.StatusCode == 409) // Payment gateway uses 409 for duplicate approval requests.
 {
     return PaymentResult.DuplicateRequest();
 }
@@ -1286,8 +1167,26 @@ if (paymentAttempt.RequestedAt > mLastRequestedAt
 좋은 예:
 
 ```cs
-if (IsDuplicatePaymentAttempt(paymentAttempt))
+// Payment gateway uses 409 for duplicate approval requests.
+if (paymentResponse.StatusCode == 409)
 {
     return PaymentResult.DuplicateRequest();
 }
+```
+
+### 13.3. 주석보다 이름을 우선하는 규칙
+
+- 변수, 메서드, 타입의 의미를 설명하기 위한 주석이 필요하다면 이름을 먼저 고친다.
+
+좋지 않은 예:
+
+```cs
+// Sends a password reset email.
+Send(user);
+```
+
+좋은 예:
+
+```cs
+SendPasswordResetEmail(user);
 ```

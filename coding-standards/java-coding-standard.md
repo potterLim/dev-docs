@@ -191,8 +191,9 @@ public BigDecimal calculateOrderTotalRecursive(OrderNode orderNode);
 - 값의 의미, 역할, 상태, 개수, 위치가 드러나야 한다.
 - 의미 없는 축약어, 임의의 약어, 단일 문자 변수 이름은 사용하지 않는다.
   - 단, 짧은 반복문 인덱스처럼 관례적으로 명확한 경우는 예외로 한다.
+- 단순 반복문 변수가 아닌 경우 `i`, `e` 같은 변수 이름 대신 `index`, `employee`처럼 저장된 데이터를 바로 알 수 있는 이름을 사용한다.
 - 컬렉션은 복수형으로 작성한다.
-- `Map`은 가능하면 `xxxByYyy` 형태를 사용한다.
+- `Map` 같은 키-값 대응 컬렉션은 가능하면 `xxxByYyy` 형태를 사용한다.
 - `boolean` 변수는 `is`, `has`, `can`, `should`를 우선 사용한다.
 
 좋지 않은 예:
@@ -348,7 +349,7 @@ public class OrderService {
 - `public` 인스턴스 멤버 변수와 변경 가능한 `public static` 멤버 변수는 금지한다.
 - 상수를 제외한 모든 멤버 변수는 원칙적으로 `private`으로 선언한다.
 - 변경되지 않는 멤버 변수는 가능한 한 `final`로 선언한다.
-- 외부 노출이 필요하더라도 관성적으로 getter / setter를 만들지 않는다.
+- 외부 노출이 필요하더라도 일괄적으로 getter / setter를 만들지 않는다.
 - 단순 값 변경보다 의미 있는 상태 변경을 표현하는 메서드를 우선한다.
 
 좋지 않은 예:
@@ -396,7 +397,6 @@ public class UserProfile {
 
 - 지역 변수는 사용 직전에 선언하여 범위를 최소화한다.
 - 같은 범위 안에서는 지역 변수마다 서로 다른 역할이 이름에 분명히 드러나야 한다.
-- 한 줄에 변수 하나만 선언한다.
 
 좋지 않은 예:
 
@@ -418,7 +418,30 @@ if (order.hasDiscountCoupon()) {
 }
 ```
 
-### 6.2. 메서드 오버로딩 규칙
+### 6.2. 긴 표현식 분리 규칙
+
+- 인덱스, 오프셋, 크기, 좌표 계산처럼 여러 의미가 섞인 계산을 하나의 표현식에 몰아넣지 않는다.
+- 표현식이 길어지면 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
+- 중간 변수 이름은 계산 방식보다 값의 의미를 드러내야 한다.
+- 단순히 줄 길이를 줄이기 위한 `temp`, `value`, `result` 같은 이름은 사용하지 않는다.
+- 한눈에 이해되는 단순 표현식은 불필요하게 나누지 않는다.
+
+좋지 않은 예:
+
+```java
+int sourceByteIndex = (region.getY() + y) * bytesPerRow + (region.getX() + x) * channelCount + channelIndex;
+```
+
+좋은 예:
+
+```java
+int sourceRowOffset = (region.getY() + y) * bytesPerRow;
+int sourceColumnOffset = (region.getX() + x) * channelCount;
+
+int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
+```
+
+### 6.3. 메서드 오버로딩 규칙
 
 - 매개 변수 자료형만 다른 모호한 오버로딩은 지양한다.
 - 이름만으로도 동작 차이가 드러나야 한다.
@@ -436,33 +459,6 @@ public List<User> search(SearchKeyword keyword);
 ```java
 public User searchByUserId(UserId userId);
 public List<User> searchByKeyword(SearchKeyword searchKeyword);
-```
-
-### 6.3. 입력 검증 규칙
-
-- 외부 입력은 시스템 경계에서 검증한다.
-- 검증 실패는 시스템 경계에서 즉시 처리한다.
-- 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
-- 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
-
-좋은 예:
-
-```java
-private final IUserRepository mUserRepository;
-
-public User findUserByEmailOrNull(String emailOrNull) {
-    if (emailOrNull == null || emailOrNull.isBlank()) {
-        return null;
-    }
-
-    EmailAddress emailAddress = new EmailAddress(emailOrNull);
-    return findUserByEmailInternal(emailAddress);
-}
-
-private User findUserByEmailInternal(EmailAddress emailAddress) {
-    assert (emailAddress != null) : "emailAddress must already be validated";
-    return mUserRepository.findByEmail(emailAddress);
-}
 ```
 
 ### 6.4. 강타입 매개 변수 설계 규칙
@@ -613,7 +609,48 @@ public enum ESaveMode {
 public void saveUser(User user, ESaveMode saveMode);
 ```
 
-### 6.5. `@Override` 사용 규칙
+### 6.5. 컬렉션 자료형 사용 규칙
+
+- 원시 타입(raw type) 컬렉션은 사용하지 않는다.
+- 컬렉션에는 요소 자료형을 명시한다.
+- 일반 배열을 사용하는 것도 허용한다.
+
+좋은 예:
+
+```java
+List<Order> completedOrders = new ArrayList<Order>();
+Map<UserId, User> usersById = new HashMap<UserId, User>();
+String[] fileNames = new String[10];
+```
+
+### 6.6. 입력 검증 규칙
+
+- 외부 입력은 시스템 경계에서 검증한다.
+- 검증 실패는 시스템 경계에서 즉시 처리한다.
+- 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
+- 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
+
+좋은 예:
+
+```java
+private final IUserRepository mUserRepository;
+
+public User findUserByEmailOrNull(String emailOrNull) {
+    if (emailOrNull == null || emailOrNull.isBlank()) {
+        return null;
+    }
+
+    EmailAddress emailAddress = new EmailAddress(emailOrNull);
+    return findUserByEmailInternal(emailAddress);
+}
+
+private User findUserByEmailInternal(EmailAddress emailAddress) {
+    assert (emailAddress != null) : "emailAddress must already be validated";
+    return mUserRepository.findByEmail(emailAddress);
+}
+```
+
+### 6.7. `@Override` 사용 규칙
 
 - 메서드를 오버라이딩할 때는 항상 `@Override`를 명시한다.
 - 인터페이스 메서드를 구현할 때도 `@Override`를 명시한다.
@@ -712,17 +749,11 @@ assert (orderStatus != null) : "orderStatus must already be validated";
 
 ## 9. `null` 처리 규칙
 
-- 매개 변수로 `null`을 전달하는 것은 지양한다.
-- `null`을 허용해야 하는 경우 매개 변수 이름 끝에 `OrNull`을 붙인다.
-
-```java
-public User findUserByEmailOrNull(String emailOrNull);
-```
-
-- 반환값으로 `null`을 사용하는 것도 지양한다.
-- 특히 `public` 메서드는 `null` 반환보다 더 명확한 대안을 우선 검토한다.
-- `null`을 반환해야 하는 경우 메서드 이름 끝에 `OrNull`을 붙인다.
-- 컬렉션 반환값은 `null` 대신 빈 컬렉션을 반환한다.
+- `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
+  - 호출자가 값을 전달하지 않을 수 있는 매개 변수에만 예외적으로 `null`을 허용한다.
+  - 값을 찾지 못한 상태를 반환값으로 알려야 하는 경우에만 예외적으로 `null`을 반환한다.
+- `null`을 허용하는 매개 변수와 `null`을 반환하는 메서드는 이름 뒤에 `OrNull`을 붙인다.
+- 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
 
 좋지 않은 예:
 
@@ -743,9 +774,9 @@ public List<Order> findOrdersByUserId(UserId userId) {
 
 ## 10. `var` 사용 규칙
 
-- `var`는 자료형이 우변에서 명확히 드러나는 경우에만 제한적으로 사용한다.
-- 메서드 반환값처럼 자료형이 이름만으로 분명하지 않은 경우에는 사용하지 않는다.
-- `var` 때문에 읽는 사람이 자료형을 추측해야 한다면 명시적 자료형을 사용한다.
+- `var` 키워드는 원칙적으로 사용하지 않는다.
+- 자료형이 우변에서 명확히 드러나는 경우에는 사용할 수 있다.
+- 향상된 for 문에서는 반복 대상의 요소 의미가 분명할 때 `var`를 사용할 수 있다.
 
 좋지 않은 예:
 
@@ -754,19 +785,22 @@ var user = mUserService.findUserById(mCurrentUserId);
 var orders = mOrderRepository.findAll();
 ```
 
-허용 가능한 예:
-
-```java
-var user = new User();
-var defaultTimeZone = "Asia/Seoul";
-var ordersById = new HashMap<OrderId, Order>();
-```
-
 좋은 예:
 
 ```java
 User user = mUserService.findUserById(mCurrentUserId);
 List<Order> orders = mOrderRepository.findAll();
+```
+
+허용 가능한 예외:
+
+```java
+var invoice = new Invoice();
+var ordersById = new HashMap<OrderId, Order>();
+
+for (var order : pendingOrders) {
+    submitOrder(order);
+}
 ```
 
 ## 11. 포맷팅 규칙
@@ -888,29 +922,24 @@ long timeoutMillis = 1_000L;
 public static final long PAYMENT_TIMEOUT_MILLIS = 3_000L;
 ```
 
-## 12. 주석 및 공개 API 문서화 규칙
+## 12. 주석 작성 규칙
 
 ### 12.1. 주석 작성 원칙
 
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
-- 주석은 가능한 한 가까운 코드 위에 둔다.
-- 오래 유지되어야 하는 정책이나 도메인 규칙은 주석보다 이름, 자료형, 메서드 구조로 먼저 표현한다.
+- 공개 API에는 호출자가 알아야 하는 계약이 있을 때만 문서 주석을 작성한다.
+- 문서 주석에는 매개 변수 제약, `null` 허용 여부, 반환값, 실패 시 동작처럼 호출자가 알아야 하는 내용을 적는다.
 - 임시 주석, 죽은 코드, 오래된 TODO는 남기지 않는다.
 - TODO에는 담당자나 추적 가능한 이슈 번호를 함께 적는다.
 
 좋지 않은 예:
 
 ```java
-// Approves payment.
-approvePayment(paymentId);
-```
-
-TODO를 남겨야 하는 경우:
-
-```java
-// TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
-PaymentResult paymentResult = mPaymentGateway.approveOrFallback(paymentRequest);
+// Checks whether the payment attempt was submitted recently.
+if (paymentAttempt.isRecentlySubmitted(mClock.instant())) {
+    return PaymentResult.duplicateRequest();
+}
 ```
 
 좋은 예:
@@ -922,89 +951,22 @@ if (paymentAttempt.isRecentlySubmitted(mClock.instant())) {
 }
 ```
 
-### 12.2. 공개 API 주석 규칙
-
-- 공개 API에는 필요한 경우 문서 주석을 작성한다.
-- 메서드 이름과 시그니처만으로 충분히 분명하면 불필요한 문서 주석을 쓰지 않는다.
-- 호출자가 알아야 하는 계약을 문서 주석에 적는다.
-  - 매개 변수의 허용 범위
-  - `null` 허용 여부
-  - 반환값의 의미
-  - 실패 시 반환되는 값
-  - 호출 순서나 상태 제약
-  - 스레드 안전성
-- 내부 구현 방식이나 코드만 봐도 알 수 있는 내용은 문서 주석에 반복하지 않는다.
-- 문서 주석의 설명과 실제 코드가 달라지지 않도록, 동작을 바꾸면 문서 주석도 함께 수정한다.
-
-좋지 않은 예:
+TODO를 남겨야 하는 경우:
 
 ```java
-/**
- * Cancels an order.
- */
-public boolean cancelOrder(OrderId orderId) {
-    return cancelOrderInternal(orderId);
-}
+// TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
+PaymentResult paymentResult = mPaymentGateway.approveOrFallback(paymentRequest);
 ```
 
-좋은 예:
-
-```java
-/**
- * Cancels an order that has not been shipped.
- *
- * @param orderId order ID to cancel. If null, the method returns false.
- * @return true if the order was canceled; false if the order was not found or already shipped.
- */
-public boolean cancelOrder(OrderId orderId) {
-    if (orderId == null) {
-        return false;
-    }
-
-    Order order = findOrderOrNull(orderId);
-    if (order == null || order.isShipped()) {
-        return false;
-    }
-
-    return order.cancel();
-}
-```
-
-### 12.3. 인라인 주석 규칙
+### 12.2. 인라인 주석 규칙
 
 - 인라인 주석은 줄 끝에 길게 붙이지 않는다.
 - 코드 위에 독립된 줄로 작성한다.
-- 조건이 복잡한 경우 주석보다 의미 있는 메서드로 먼저 분리한다.
 
 좋지 않은 예:
 
 ```java
-if (shippingCalendar.isWeekend(requestedDate)) { // weekend is not supported
-    return DeliveryEstimate.unavailable();
-}
-```
-
-좋은 예:
-
-```java
-// External shipment API treats weekends as non-business days.
-if (shippingCalendar.isWeekend(requestedDate)) {
-    return DeliveryEstimate.unavailable();
-}
-```
-
-### 12.4. 주석보다 이름을 우선하는 규칙
-
-- 주석이 필요한 이유가 이름이 모호하기 때문이라면 이름을 먼저 고친다.
-- 조건식이 복잡해서 주석이 필요하다면 의미 있는 메서드로 분리한다.
-- 주석은 코드의 부족한 표현력을 보완하는 마지막 수단으로 사용한다.
-
-좋지 않은 예:
-
-```java
-// Checks duplicate payment request.
-if (paymentAttempt.getRequestedAt().isAfter(mLastRequestedAt)
-        && paymentAttempt.getPaymentId().equals(mLastPaymentId)) {
+if (paymentResponse.getStatusCode() == 409) { // Payment gateway uses 409 for duplicate approval requests.
     return PaymentResult.duplicateRequest();
 }
 ```
@@ -1012,8 +974,25 @@ if (paymentAttempt.getRequestedAt().isAfter(mLastRequestedAt)
 좋은 예:
 
 ```java
-if (isDuplicatePaymentAttempt(paymentAttempt)) {
+// Payment gateway uses 409 for duplicate approval requests.
+if (paymentResponse.getStatusCode() == 409) {
     return PaymentResult.duplicateRequest();
 }
 ```
 
+### 12.3. 주석보다 이름을 우선하는 규칙
+
+- 변수, 메서드, 타입의 의미를 설명하기 위한 주석이 필요하다면 이름을 먼저 고친다.
+
+좋지 않은 예:
+
+```java
+// Sends a password reset email.
+send(user);
+```
+
+좋은 예:
+
+```java
+sendPasswordResetEmail(user);
+```
