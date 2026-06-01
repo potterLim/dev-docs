@@ -23,9 +23,8 @@
 
 이 코딩 표준은 다음 자료를 참고하되, 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
 
-- [언리얼 엔진 4 코딩 표준](https://docs.unrealengine.com/latest/INT/Programming/Development/CodingStandard/)
-- [둠 3 코드 스타일과 규칙](ftp://ftp.idsoftware.com/idstuff/doom3/source/codestyleconventions.doc)
-- [IDesign C# 코딩 표준](http://www.idesign.net/downloads/getdownload/1985)
+- [.NET Runtime C# Coding Style](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md)
+- [Microsoft .NET Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
 
 ## 2. 파일, `using`, 네임스페이스, 클래스 구조
 
@@ -216,7 +215,7 @@ public enum EPermissionFlags
 좋지 않은 예:
 
 ```cs
-public User UserByID(UserID userID);
+public User UserById(UserId userId);
 public void Process();
 public bool Flag();
 public decimal Calculate(OrderNode orderNode);
@@ -225,16 +224,16 @@ public decimal Calculate(OrderNode orderNode);
 좋은 예:
 
 ```cs
-public User FindUserByID(UserID userID);
-public IReadOnlyList<Order> FindPendingOrders(UserID userID);
-public void ApprovePayment(PaymentID paymentID);
+public User FindUserById(UserId userId);
+public IReadOnlyList<Order> FindPendingOrders(UserId userId);
+public void ApprovePayment(PaymentId paymentId);
 public bool IsExpired(Coupon coupon);
 public bool HasPermission(User user, EPermissionFlags permission);
 public bool CanCancel(Order order);
 public bool ShouldRetry(PaymentAttempt paymentAttempt);
 public decimal CalculateOrderTotalRecursive(OrderNode orderNode);
 
-private User findUserByID(UserID userID);
+private User findUserById(UserId userId);
 ```
 
 ### 3.3. 변수 이름 규칙
@@ -255,7 +254,7 @@ private User findUserByID(UserID userID);
 int cnt;
 string str;
 List<Order> list;
-Dictionary<UserID, User> map;
+Dictionary<UserId, User> map;
 bool flag;
 ```
 
@@ -267,7 +266,7 @@ int currentPage;
 string invoiceFilePath;
 
 List<Order> pendingOrders;
-Dictionary<OrderID, Order> ordersByID;
+Dictionary<OrderId, Order> ordersById;
 
 bool isPaymentApproved;
 bool hasDeliveryAddress;
@@ -311,20 +310,16 @@ public bool CanExport { get; private set; }
 public bool ShouldRefresh { get; private set; }
 ```
 
-### 3.6. 상수와 줄임말 규칙
+### 3.6. 상수 이름 규칙
 
 - 상수의 이름은 모두 대문자와 밑줄을 사용한다.
 - 객체 값을 상수처럼 사용할 때는 `static readonly`를 사용한다.
 - 상수로 사용하는 `static readonly` 멤버 변수는 모두 대문자와 밑줄을 사용한다.
-- 뒤에 추가적인 단어가 오지 않는 경우 줄임말은 모두 대문자로 표기한다.
-- 줄임말 뒤에 다른 단어가 이어지면 일반 단어처럼 `PascalCase`를 사용한다.
 
 좋지 않은 예:
 
 ```cs
 const int MaxRetryCount = 3;
-public int OrderId { get; private set; }
-public int HTTPCode { get; private set; }
 ```
 
 좋은 예:
@@ -334,10 +329,6 @@ const int MAX_RETRY_COUNT = 3;
 const string DEFAULT_COUNTRY_CODE = "KR";
 
 public static readonly CurrencyInfo DEFAULT_CURRENCY = new CurrencyInfo("KRW");
-
-public int OrderID { get; private set; }
-public int HttpCode { get; private set; }
-public string ApiKey { get; private set; }
 ```
 
 ## 4. 멤버 구성 및 순서
@@ -382,23 +373,23 @@ public class OrderService
         mPaymentGateway = paymentGateway;
     }
 
-    public Receipt ApproveOrder(OrderID orderID)
+    public Receipt ApproveOrder(OrderId orderId)
     {
-        Order? order = findOrderOrNull(orderID);
+        Order? order = findOrderOrNull(orderId);
         if (order == null || order.CanApprovePayment() == false)
         {
-            return Receipt.Rejected(orderID);
+            return Receipt.Rejected(orderId);
         }
 
-        mPaymentGateway.Approve(order.PaymentID);
+        mPaymentGateway.Approve(order.PaymentId);
         order.MarkAsPaid();
         mOrderRepository.Save(order);
-        return Receipt.Approved(orderID);
+        return Receipt.Approved(orderId);
     }
 
-    private Order? findOrderOrNull(OrderID orderID)
+    private Order? findOrderOrNull(OrderId orderId)
     {
-        return mOrderRepository.FindByIDOrNull(orderID);
+        return mOrderRepository.FindByIdOrNull(orderId);
     }
 }
 ```
@@ -487,7 +478,7 @@ public class UserProfile
 ### 5.3. 읽기 전용 값 규칙
 
 - 초기화 후 값이 변하지 않는 변수는 `readonly`로 선언한다.
-- 프로퍼티에 `private init`(C# 9.0)을 최대한 사용한다.
+- 프로퍼티에 `private init`(C# 9.0)을 가능한 한 사용한다.
 - 객체 초기자(object initializer)는 지양한다.
   - 단, `required` 한정자(C# 11.0)와 초기화 전용 setter(C# 9.0)로 불변 객체를 구성할 때는 허용한다.
 
@@ -588,14 +579,14 @@ int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
 좋지 않은 예:
 
 ```cs
-public User Search(UserID userID);
+public User Search(UserId userId);
 public IReadOnlyList<User> Search(SearchKeyword searchKeyword);
 ```
 
 좋은 예:
 
 ```cs
-public User FindUserByID(UserID userID);
+public User FindUserById(UserId userId);
 public IReadOnlyList<User> SearchUsersByKeyword(SearchKeyword searchKeyword);
 ```
 
@@ -725,12 +716,12 @@ public IReadOnlyList<User> SortUsers(IReadOnlyList<User> users, ESortOrder sortO
 #### 전용 자료형 사용 예
 
 ```cs
-public readonly record struct UserID(long Value);
+public readonly record struct UserId(long Value);
 public readonly record struct SearchKeyword(string Value);
 
-public User FindUserByID(UserID userID)
+public User FindUserById(UserId userId)
 {
-    return mUserRepository.FindByID(userID);
+    return mUserRepository.FindById(userId);
 }
 
 public IReadOnlyList<User> SearchUsers(SearchKeyword searchKeyword)
@@ -744,10 +735,10 @@ public IReadOnlyList<User> SearchUsers(SearchKeyword searchKeyword)
 ```cs
 public sealed class OrderSearchCriteria
 {
-    public SearchKeyword Keyword { get; init; }
-    public EOrderStatus Status { get; init; }
-    public int PageNumber { get; init; }
-    public int PageSize { get; init; }
+    public required SearchKeyword Keyword { get; init; }
+    public required EOrderStatus Status { get; init; }
+    public required int PageNumber { get; init; }
+    public required int PageSize { get; init; }
 }
 
 public IReadOnlyList<Order> SearchOrders(OrderSearchCriteria criteria)
@@ -785,7 +776,7 @@ public void SaveOrder(Order order, ESaveMode saveMode);
 
 ```cs
 List<Order> completedOrders = new List<Order>();
-Dictionary<UserID, User> usersByID = new Dictionary<UserID, User>();
+Dictionary<UserId, User> usersById = new Dictionary<UserId, User>();
 string[] fileNames = new string[10];
 ```
 
@@ -834,11 +825,11 @@ public Receipt ApprovePayment(Order order)
 {
     if (order.CanApprovePayment() == false)
     {
-        return Receipt.Rejected(order.ID);
+        return Receipt.Rejected(order.Id);
     }
 
-    Payment payment = mPaymentGateway.Approve(order.PaymentID);
-    return Receipt.Approved(order.ID, payment.ApprovedAt);
+    Payment payment = mPaymentGateway.Approve(order.PaymentId);
+    return Receipt.Approved(order.Id, payment.ApprovedAt);
 }
 ```
 
@@ -958,7 +949,7 @@ using (StreamReader reader = new StreamReader(filePath))
 }
 ```
 
-## 8. `assert` 사용 규칙
+## 8. `Debug.Assert()` 사용 규칙
 
 - `Debug.Assert()`는 코드가 전제로 삼는 내부 불변식과 사전 조건을 확인할 때 사용한다.
 - 특정 조건이 반드시 충족되어야 한다고 가정한 지점에는 `Debug.Assert()`를 둔다.
@@ -989,7 +980,7 @@ public decimal CalculateAverageUnitPrice(Order order)
 
 ```cs
 public User? FindUserByEmail(string? emailOrNull);
-public IReadOnlyList<Order>? FindOrdersOrNull(UserID userID);
+public IReadOnlyList<Order>? FindOrdersOrNull(UserId userId);
 ```
 
 좋은 예:
@@ -1005,9 +996,9 @@ public User? FindUserByEmailOrNull(string? emailOrNull)
     return mUserRepository.FindByEmailOrNull(emailOrNull);
 }
 
-public IReadOnlyList<Order> FindOrdersByUserID(UserID userID)
+public IReadOnlyList<Order> FindOrdersByUserId(UserId userId)
 {
-    return mOrderRepository.FindByUserID(userID);
+    return mOrderRepository.FindByUserId(userId);
 }
 ```
 
@@ -1024,7 +1015,7 @@ public IReadOnlyList<Order> FindOrdersByUserID(UserID userID)
 좋지 않은 예:
 
 ```cs
-var currentUser = mUserService.FindUserByID(mCurrentUserID);
+var currentUser = mUserService.FindUserById(mCurrentUserId);
 var orders = mOrderRepository.FindAll();
 
 User user = new();
@@ -1033,9 +1024,9 @@ User user = new();
 좋은 예:
 
 ```cs
-User currentUser = mUserService.FindUserByID(mCurrentUserID);
+User currentUser = mUserService.FindUserById(mCurrentUserId);
 IReadOnlyList<Order> orders = mOrderRepository.FindAll();
-Dictionary<OrderID, Order> ordersByID = new Dictionary<OrderID, Order>();
+Dictionary<OrderId, Order> ordersById = new Dictionary<OrderId, Order>();
 
 User newUser = new User();
 ```
@@ -1044,9 +1035,9 @@ User newUser = new User();
 
 ```cs
 var newOrder = new Order();
-var ordersByID = new Dictionary<OrderID, Order>();
+var ordersById = new Dictionary<OrderId, Order>();
 
-var ordersByCustomerID = pendingOrders.GroupBy(order => order.CustomerID);
+var ordersByCustomerId = pendingOrders.GroupBy(order => order.CustomerId);
 
 foreach (var order in pendingOrders)
 {
@@ -1056,35 +1047,37 @@ foreach (var order in pendingOrders)
 
 ## 11. 비동기 처리 규칙
 
-- `async void` 대신 `async Task`를 사용한다.
-  - `async void`가 허용되는 유일한 곳은 이벤트 핸들러이다.
-- `async` 메서드 이름에 `Async` 접미사를 붙이지 않는다.
+- 비동기 메서드 이름에는 `Async` 접미사를 붙인다.
+- 비동기 메서드는 `Task` 또는 `Task<T>`를 반환한다.
+- 성능상 필요한 경우에만 `ValueTask` 또는 `ValueTask<T>`를 사용할 수 있다.
+- `async void`는 사용하지 않는다.
 
 좋지 않은 예:
 
 ```cs
-public async void SaveOrder()
+public async void SaveOrder(Order order, CancellationToken cancellationToken)
 {
-    await mOrderRepository.Save(CancellationToken.None);
+    await mOrderRepository.SaveAsync(order, cancellationToken);
 }
 
-public async Task SaveOrderAsync(CancellationToken cancellationToken)
+public async Task SubmitOrder(Order order, CancellationToken cancellationToken)
 {
-    await mOrderRepository.Save(cancellationToken);
+    await mOrderRepository.SubmitAsync(order, cancellationToken);
 }
 ```
 
 좋은 예:
 
 ```cs
-public async Task SaveOrder(CancellationToken cancellationToken)
+public async Task SaveOrderAsync(Order order, CancellationToken cancellationToken)
 {
-    await mOrderRepository.Save(cancellationToken);
+    await mOrderRepository.SaveAsync(order, cancellationToken);
 }
 
-private async void handleSaveButtonClick(object sender, EventArgs e)
+public async Task<Receipt> SubmitOrderAsync(Order order, CancellationToken cancellationToken)
 {
-    await SaveOrder(CancellationToken.None);
+    Payment payment = await mPaymentGateway.ApproveAsync(order.PaymentId, cancellationToken);
+    return Receipt.Approved(order.Id, payment.ApprovedAt);
 }
 ```
 

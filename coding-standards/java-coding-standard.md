@@ -50,7 +50,7 @@ public class OrderService {
 
 - 패키지 이름은 모두 소문자로 작성한다.
 - 회사, 제품, 도메인, 기능 순서처럼 큰 범위에서 작은 범위로 내려가도록 작성한다.
-- 패키지 이름에 밑줄(`_`)나 대문자를 사용하지 않는다.
+- 패키지 이름에 밑줄(`_`)이나 대문자를 사용하지 않는다.
 
 좋지 않은 예:
 
@@ -516,12 +516,12 @@ public final class SearchKeyword {
         mValue = value;
     }
 
-    public static SearchKeyword createOrNull(String value) {
-        if (value == null || value.isBlank()) {
+    public static SearchKeyword createOrNull(String valueOrNull) {
+        if (valueOrNull == null || valueOrNull.isBlank()) {
             return null;
         }
 
-        return new SearchKeyword(value);
+        return new SearchKeyword(valueOrNull);
     }
 
     public String getValue() {
@@ -553,10 +553,13 @@ public final class OrderSearchCriteria {
     }
 
     public static OrderSearchCriteria createOrNull(
-            SearchKeyword keyword,
-            EOrderStatus status,
+            SearchKeyword keywordOrNull,
+            EOrderStatus statusOrNull,
             int pageNumber,
             int pageSize) {
+        if (keywordOrNull == null || statusOrNull == null) {
+            return null;
+        }
         if (pageNumber < 1) {
             return null;
         }
@@ -564,7 +567,7 @@ public final class OrderSearchCriteria {
             return null;
         }
 
-        return new OrderSearchCriteria(keyword, status, pageNumber, pageSize);
+        return new OrderSearchCriteria(keywordOrNull, statusOrNull, pageNumber, pageSize);
     }
 
     public SearchKeyword getKeyword() {
