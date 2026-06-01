@@ -72,7 +72,7 @@ package com.awesome.shop.delivery.tracking;
 - 와일드카드(`*`) `import`는 금지한다.
 - 필요한 클래스만 명시적으로 `import`한다.
 - 사용하지 않는 `import`는 남기지 않는다.
-- static import는 테스트 코드나 가독성이 분명히 좋아지는 경우에만 제한적으로 사용한다.
+- `static import`는 테스트 코드나 가독성이 분명히 좋아지는 경우에만 제한적으로 사용한다.
 
 좋지 않은 예:
 
@@ -216,6 +216,8 @@ List<Order> pendingOrders;
 Map<OrderId, Order> ordersById;
 boolean isPaymentApproved;
 boolean hasDeliveryAddress;
+boolean canRetry;
+boolean shouldUpdateCache;
 ```
 
 ### 3.4. 멤버 변수 이름 규칙
@@ -233,7 +235,7 @@ private String mUserName;
 private int mRetryCount;
 private boolean mIsEnabled;
 private boolean mHasPermission;
-private static String sDefaultTimeZone;
+private static String sCurrentTimeZone;
 ```
 
 #### `this` 사용 예
@@ -306,7 +308,6 @@ public static final String DEFAULT_TIME_ZONE = "Asia/Seoul";
 - 필요에 따라 관련된 멤버끼리 논리적으로 묶어 배치할 수 있다.
 - `private` 헬퍼 메서드는 이를 사용하는 `public` 메서드 아래쪽에 배치한다.
 - 오버로드된 메서드는 서로 떨어뜨리지 않고 함께 배치한다.
-- 멤버 변수는 가능한 한 `private`으로 제한한다.
 
 좋은 예:
 
@@ -314,7 +315,7 @@ public static final String DEFAULT_TIME_ZONE = "Asia/Seoul";
 public class OrderService {
     public static final int MAX_ORDER_LINE_COUNT = 100;
 
-    private static String sDefaultCurrencyCode = "KRW";
+    private static String sCurrentCurrencyCode = "KRW";
 
     private final IOrderRepository mOrderRepository;
     private final IPaymentGateway mPaymentGateway;
@@ -324,16 +325,16 @@ public class OrderService {
         mPaymentGateway = paymentGateway;
     }
 
-    public boolean approveOrder(OrderId orderId) {
+    public Receipt approveOrder(OrderId orderId) {
         Order order = findOrderOrNull(orderId);
         if (order == null || !order.canApprovePayment()) {
-            return false;
+            return Receipt.rejected(orderId);
         }
 
         mPaymentGateway.approve(order.getPaymentId());
         order.markAsPaid();
         mOrderRepository.save(order);
-        return true;
+        return Receipt.approved(orderId);
     }
 
     private Order findOrderOrNull(OrderId orderId) {
@@ -349,7 +350,7 @@ public class OrderService {
 - `public` 인스턴스 멤버 변수와 변경 가능한 `public static` 멤버 변수는 금지한다.
 - 상수를 제외한 모든 멤버 변수는 원칙적으로 `private`으로 선언한다.
 - 변경되지 않는 멤버 변수는 가능한 한 `final`로 선언한다.
-- 외부 노출이 필요하더라도 일괄적으로 getter / setter를 만들지 않는다.
+- 외부 노출이 필요하더라도 일괄적으로 getter와 setter를 만들지 않는다.
 - 단순 값 변경보다 의미 있는 상태 변경을 표현하는 메서드를 우선한다.
 
 좋지 않은 예:
@@ -450,15 +451,15 @@ int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
 좋지 않은 예:
 
 ```java
-public User search(String userId);
-public List<User> search(SearchKeyword keyword);
+public User search(UserId userId);
+public List<User> search(SearchKeyword searchKeyword);
 ```
 
 좋은 예:
 
 ```java
-public User searchByUserId(UserId userId);
-public List<User> searchByKeyword(SearchKeyword searchKeyword);
+public User findUserById(UserId userId);
+public List<User> searchUsersByKeyword(SearchKeyword searchKeyword);
 ```
 
 ### 6.4. 강타입 매개 변수 설계 규칙
@@ -586,7 +587,7 @@ public final class OrderSearchCriteria {
 private final IOrderRepository mOrderRepository;
 
 public List<Order> searchOrders(OrderSearchCriteria criteria) {
-    return mOrderRepository.findByCriteria(criteria);
+    return mOrderRepository.search(criteria);
 }
 ```
 
@@ -595,18 +596,18 @@ public List<Order> searchOrders(OrderSearchCriteria criteria) {
 좋지 않은 예:
 
 ```java
-public void saveUser(User user, boolean shouldOverwrite);
+public void saveOrder(Order order, boolean shouldOverwrite);
 ```
 
 좋은 예:
 
 ```java
 public enum ESaveMode {
-    OVERWRITE,
-    CREATE_NEW
+    CREATE_NEW,
+    OVERWRITE
 }
 
-public void saveUser(User user, ESaveMode saveMode);
+public void saveOrder(Order order, ESaveMode saveMode);
 ```
 
 ### 6.5. 컬렉션 자료형 사용 규칙
@@ -750,22 +751,23 @@ assert (orderStatus != null) : "orderStatus must already be validated";
 ## 9. `null` 처리 규칙
 
 - `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
-  - 호출자가 값을 전달하지 않을 수 있는 매개 변수에만 예외적으로 `null`을 허용한다.
-  - 값을 찾지 못한 상태를 반환값으로 알려야 하는 경우에만 예외적으로 `null`을 반환한다.
-- `null`을 허용하는 매개 변수와 `null`을 반환하는 메서드는 이름 뒤에 `OrNull`을 붙인다.
+  - 호출자가 값을 전달하지 않는 상황을 허용해야 할 때만 예외적으로 매개 변수에 `null`을 허용한다.
+  - 조회 실패나 생성 실패처럼 반환할 결과가 없는 상황을 호출자가 처리해야 할 때만 예외적으로 `null`을 반환한다.
+- `null`을 허용하는 매개 변수 이름에는 `OrNull`을 붙인다.
+- `null`을 반환하는 메서드 이름에는 `OrNull`을 붙인다.
 - 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
 
 좋지 않은 예:
 
 ```java
-public String getDisplayName();
+public User findUserByEmail(String emailOrNull);
 public List<Order> findOrdersOrNull(UserId userId);
 ```
 
 좋은 예:
 
 ```java
-public String getDisplayNameOrNull();
+public User findUserByEmailOrNull(String emailOrNull);
 
 public List<Order> findOrdersByUserId(UserId userId) {
     return mOrderRepository.findByUserId(userId);
@@ -781,21 +783,21 @@ public List<Order> findOrdersByUserId(UserId userId) {
 좋지 않은 예:
 
 ```java
-var user = mUserService.findUserById(mCurrentUserId);
+var currentUser = mUserService.findUserById(mCurrentUserId);
 var orders = mOrderRepository.findAll();
 ```
 
 좋은 예:
 
 ```java
-User user = mUserService.findUserById(mCurrentUserId);
+User currentUser = mUserService.findUserById(mCurrentUserId);
 List<Order> orders = mOrderRepository.findAll();
 ```
 
 허용 가능한 예외:
 
 ```java
-var invoice = new Invoice();
+var newOrder = new Order();
 var ordersById = new HashMap<OrderId, Order>();
 
 for (var order : pendingOrders) {

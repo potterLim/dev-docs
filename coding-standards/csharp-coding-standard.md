@@ -161,17 +161,17 @@ public interface PaymentGateway
 {
 }
 
-public enum PaymentStatus
+public enum OrderStatus
 {
     pending,
-    approved,
+    paid,
 }
 ```
 
 좋은 예:
 
 ```cs
-public class PaymentApprovalService
+public class UserRegistrationService
 {
 }
 
@@ -179,11 +179,12 @@ public interface IPaymentGateway
 {
 }
 
-public enum EPaymentStatus
+public enum EOrderStatus
 {
     Pending,
-    Approved,
-    Declined,
+    Paid,
+    ReadyToShip,
+    Shipped,
     Canceled,
 }
 
@@ -215,7 +216,7 @@ public enum EPermissionFlags
 좋지 않은 예:
 
 ```cs
-public Invoice Invoice(InvoiceID invoiceID);
+public User UserByID(UserID userID);
 public void Process();
 public bool Flag();
 public decimal Calculate(OrderNode orderNode);
@@ -224,16 +225,16 @@ public decimal Calculate(OrderNode orderNode);
 좋은 예:
 
 ```cs
-public Invoice GetInvoiceByID(InvoiceID invoiceID);
-public IReadOnlyList<Order> GetPendingOrders(CustomerID customerID);
-public bool ApprovePayment(PaymentID paymentID);
+public User FindUserByID(UserID userID);
+public IReadOnlyList<Order> FindPendingOrders(UserID userID);
+public void ApprovePayment(PaymentID paymentID);
 public bool IsExpired(Coupon coupon);
 public bool HasPermission(User user, EPermissionFlags permission);
 public bool CanCancel(Order order);
 public bool ShouldRetry(PaymentAttempt paymentAttempt);
 public decimal CalculateOrderTotalRecursive(OrderNode orderNode);
 
-private Invoice getInvoiceByID(InvoiceID invoiceID);
+private User findUserByID(UserID userID);
 ```
 
 ### 3.3. 변수 이름 규칙
@@ -261,20 +262,17 @@ bool flag;
 좋은 예:
 
 ```cs
-public void SendInvoiceEmail(InvoiceID invoiceID, EmailAddress recipientEmailAddress)
-{
-    int retryCount;
-    int currentPage;
-    string invoiceFilePath;
+int retryCount;
+int currentPage;
+string invoiceFilePath;
 
-    List<Order> pendingOrders;
-    Dictionary<UserID, User> usersByID;
+List<Order> pendingOrders;
+Dictionary<OrderID, Order> ordersByID;
 
-    bool isPaymentApproved;
-    bool hasDeliveryAddress;
-    bool canRetry;
-    bool shouldUpdateCache;
-}
+bool isPaymentApproved;
+bool hasDeliveryAddress;
+bool canRetry;
+bool shouldUpdateCache;
 ```
 
 ### 3.4. 멤버 변수 이름 규칙
@@ -288,15 +286,14 @@ public void SendInvoiceEmail(InvoiceID invoiceID, EmailAddress recipientEmailAdd
 좋은 예:
 
 ```cs
-public class PaymentProcessor
+public class UserProfile
 {
     private int mRetryCount;
-    private string mGatewayName = string.Empty;
-    private bool mIsConnected;
-    private bool mHasPendingRequest;
+    private string mUserName = string.Empty;
+    private bool mIsEnabled;
+    private bool mHasPermission;
 
-    private static string sDefaultCurrencyCode = "KRW";
-    private static int sMaxRetryCount;
+    private static string sCurrentTimeZone = "Asia/Seoul";
 }
 ```
 
@@ -365,38 +362,43 @@ public string ApiKey { get; private set; }
 좋은 예:
 
 ```cs
-public class UserService
+public class OrderService
 {
-    private readonly IUserRepository mUserRepository;
-    private readonly IEmailSender mEmailSender;
+    private static string sCurrentCurrencyCode = "KRW";
+
+    private readonly IOrderRepository mOrderRepository;
+    private readonly IPaymentGateway mPaymentGateway;
     private bool mHasPendingRequest;
 
-    public int UserCount
+    public int OrderCount
     {
         get;
         private set;
     }
 
-    public UserService(IUserRepository userRepository, IEmailSender emailSender)
+    public OrderService(IOrderRepository orderRepository, IPaymentGateway paymentGateway)
     {
-        mUserRepository = userRepository;
-        mEmailSender = emailSender;
+        mOrderRepository = orderRepository;
+        mPaymentGateway = paymentGateway;
     }
 
-    public User GetUserByID(UserID userID)
+    public Receipt ApproveOrder(OrderID orderID)
     {
-        return mUserRepository.GetByID(userID);
+        Order? order = findOrderOrNull(orderID);
+        if (order == null || order.CanApprovePayment() == false)
+        {
+            return Receipt.Rejected(orderID);
+        }
+
+        mPaymentGateway.Approve(order.PaymentID);
+        order.MarkAsPaid();
+        mOrderRepository.Save(order);
+        return Receipt.Approved(orderID);
     }
 
-    public bool SendWelcomeEmail(UserID userID)
+    private Order? findOrderOrNull(OrderID orderID)
     {
-        User user = GetUserByID(userID);
-        return sendWelcomeEmailInternal(user);
-    }
-
-    private bool sendWelcomeEmailInternal(User user)
-    {
-        return mEmailSender.Send(user.EmailAddress);
+        return mOrderRepository.FindByIDOrNull(orderID);
     }
 }
 ```
@@ -535,22 +537,22 @@ public static class DateTimeUtility
 좋지 않은 예:
 
 ```cs
-public decimal GetDiscountedPrice(Order order, DiscountRate discountRate)
-{
-    decimal amount;
+decimal amount;
 
-    amount = order.TotalAmount * discountRate.Value;
-    return order.TotalAmount - amount;
+if (order.HasDiscountCoupon())
+{
+    amount = CalculateDiscountAmount(order);
+    order.ApplyDiscount(amount);
 }
 ```
 
 좋은 예:
 
 ```cs
-public decimal GetDiscountedPrice(Order order, DiscountRate discountRate)
+if (order.HasDiscountCoupon())
 {
-    decimal discountAmount = order.TotalAmount * discountRate.Value;
-    return order.TotalAmount - discountAmount;
+    decimal discountAmount = CalculateDiscountAmount(order);
+    order.ApplyDiscount(discountAmount);
 }
 ```
 
@@ -586,48 +588,48 @@ int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
 좋지 않은 예:
 
 ```cs
-public InvoiceAttachment GetAttachment(int index);
-public InvoiceAttachment GetAttachment(string fileName);
+public User Search(UserID userID);
+public IReadOnlyList<User> Search(SearchKeyword searchKeyword);
 ```
 
 좋은 예:
 
 ```cs
-public InvoiceAttachment GetAttachmentByIndex(int index);
-public InvoiceAttachment GetAttachmentByFileName(string fileName);
+public User FindUserByID(UserID userID);
+public IReadOnlyList<User> SearchUsersByKeyword(SearchKeyword searchKeyword);
 ```
 
 ### 6.4. 기본 매개 변수 규칙
 
 - 기본 매개 변수 대신 메서드 오버로딩을 선호한다.
-- 기본 매개 변수를 사용하는 경우 `null`, `false`, `0` 같이 비트 패턴이 0인 값을 사용한다.
+- 기본 매개 변수를 사용하는 경우 기본값의 의미가 분명한 `null`, `false`, `0` 같은 값을 사용한다.
 
 좋은 예:
 
 ```cs
-public enum EInvoiceDeliveryMethod
+public enum EOrderDeliveryMethod
 {
     Email,
     PostalMail,
 }
 
-public void SendInvoice(Invoice invoice)
+public void SendOrder(Order order)
 {
-    SendInvoice(invoice, EInvoiceDeliveryMethod.Email);
+    SendOrder(order, EOrderDeliveryMethod.Email);
 }
 
-public void SendInvoice(Invoice invoice, EInvoiceDeliveryMethod deliveryMethod)
+public void SendOrder(Order order, EOrderDeliveryMethod deliveryMethod)
 {
-    mInvoiceSender.Send(invoice, deliveryMethod);
+    mOrderSender.Send(order, deliveryMethod);
 }
 ```
 
 허용 가능한 예:
 
 ```cs
-public IReadOnlyList<Order> GetOrders(CustomerID customerID, int pageNumber = 0)
+public IReadOnlyList<Order> SearchOrders(SearchKeyword searchKeyword, int pageNumber = 0)
 {
-    return mOrderRepository.GetOrders(customerID, pageNumber);
+    return mOrderRepository.Search(searchKeyword, pageNumber);
 }
 ```
 
@@ -639,18 +641,18 @@ public IReadOnlyList<Order> GetOrders(CustomerID customerID, int pageNumber = 0)
 좋지 않은 예:
 
 ```cs
-public class InvoiceService
+public class OrderService
 {
     private int mRetryCount;
 
-    public void SendInvoices(int mRetryCount)
+    public void SubmitOrders(int mRetryCount)
     {
         if (mRetryCount <= 0)
         {
             return;
         }
 
-        SendNextInvoice(mRetryCount);
+        SubmitNextOrder(mRetryCount);
     }
 }
 ```
@@ -658,17 +660,17 @@ public class InvoiceService
 좋은 예:
 
 ```cs
-public class InvoiceService
+public class OrderService
 {
     private int mRetryCount;
 
-    public void SendInvoices(int maxRetryCount)
+    public void SubmitOrders(int maxRetryCount)
     {
-        int invoiceCount = mInvoiceRepository.GetPendingInvoiceCount();
+        int orderCount = mOrderRepository.CountPendingOrders();
 
-        for (int i = 0; i < invoiceCount; ++i)
+        for (int i = 0; i < orderCount; ++i)
         {
-            SendNextInvoice(maxRetryCount);
+            SubmitNextOrder(maxRetryCount);
         }
     }
 }
@@ -714,27 +716,26 @@ public enum ESortOrder
     Descending,
 }
 
-public IReadOnlyList<Invoice> GetInvoices(CustomerID customerID, ESortOrder sortOrder)
+public IReadOnlyList<User> SortUsers(IReadOnlyList<User> users, ESortOrder sortOrder)
 {
-    return mInvoiceRepository.GetInvoices(customerID, sortOrder);
+    return mUserRepository.SortByOrder(users, sortOrder);
 }
 ```
 
 #### 전용 자료형 사용 예
 
 ```cs
-public readonly record struct UserID(Guid Value);
-public readonly record struct EmailAddress(string Value);
-public readonly record struct ProductCode(string Value);
+public readonly record struct UserID(long Value);
+public readonly record struct SearchKeyword(string Value);
 
-public User GetUserByID(UserID userID)
+public User FindUserByID(UserID userID)
 {
-    return mUserRepository.GetByID(userID);
+    return mUserRepository.FindByID(userID);
 }
 
-public bool SendWelcomeEmail(EmailAddress emailAddress)
+public IReadOnlyList<User> SearchUsers(SearchKeyword searchKeyword)
 {
-    return mEmailSender.Send(emailAddress);
+    return mUserRepository.Search(searchKeyword);
 }
 ```
 
@@ -743,15 +744,15 @@ public bool SendWelcomeEmail(EmailAddress emailAddress)
 ```cs
 public sealed class OrderSearchCriteria
 {
-    public CustomerID CustomerID { get; init; }
+    public SearchKeyword Keyword { get; init; }
     public EOrderStatus Status { get; init; }
     public int PageNumber { get; init; }
     public int PageSize { get; init; }
 }
 
-public IReadOnlyList<Order> GetOrders(OrderSearchCriteria criteria)
+public IReadOnlyList<Order> SearchOrders(OrderSearchCriteria criteria)
 {
-    return mOrderRepository.GetOrders(criteria);
+    return mOrderRepository.Search(criteria);
 }
 ```
 
@@ -800,7 +801,7 @@ string[] fileNames = new string[10];
 ```cs
 private readonly IUserRepository mUserRepository;
 
-public User? GetUserByEmailOrNull(string? emailOrNull)
+public User? FindUserByEmailOrNull(string? emailOrNull)
 {
     if (string.IsNullOrWhiteSpace(emailOrNull))
     {
@@ -808,13 +809,13 @@ public User? GetUserByEmailOrNull(string? emailOrNull)
     }
 
     EmailAddress emailAddress = new EmailAddress(emailOrNull);
-    return getUserByEmailOrNull(emailAddress);
+    return findUserByEmailInternal(emailAddress);
 }
 
-private User? getUserByEmailOrNull(EmailAddress emailAddress)
+private User findUserByEmailInternal(EmailAddress emailAddress)
 {
     Debug.Assert(string.IsNullOrWhiteSpace(emailAddress.Value) == false);
-    return mUserRepository.GetByEmailOrNull(emailAddress);
+    return mUserRepository.FindByEmail(emailAddress);
 }
 ```
 
@@ -849,13 +850,13 @@ public Receipt ApprovePayment(Order order)
 좋지 않은 예:
 
 ```cs
-switch (menuIndex)
+switch (orderStatus)
 {
-    case 0:
-        OpenHomePage();
+    case EOrderStatus.Paid:
+        PrepareShipping();
         break;
-    case 1:
-        OpenOrderPage();
+    case EOrderStatus.ReadyToShip:
+        CreateShipment();
         break;
 }
 ```
@@ -863,13 +864,22 @@ switch (menuIndex)
 좋은 예:
 
 ```cs
-switch (menuIndex)
+switch (orderStatus)
 {
-    case 0:
-        OpenHomePage();
+    case EOrderStatus.Pending:
+        RequestPayment();
         break;
-    case 1:
-        OpenOrderPage();
+    case EOrderStatus.Paid:
+        PrepareShipping();
+        break;
+    case EOrderStatus.ReadyToShip:
+        CreateShipment();
+        break;
+    case EOrderStatus.Shipped:
+        NotifyShipmentCompleted();
+        break;
+    case EOrderStatus.Canceled:
+        CloseOrder();
         break;
     default:
         break;
@@ -879,16 +889,25 @@ switch (menuIndex)
 도달할 수 없다고 가정하는 경우:
 
 ```cs
-switch (messageType)
+switch (orderStatus)
 {
-    case EMessageType.Text:
-        SendTextMessage();
+    case EOrderStatus.Pending:
+        RequestPayment();
         break;
-    case EMessageType.Email:
-        SendEmailMessage();
+    case EOrderStatus.Paid:
+        PrepareShipping();
+        break;
+    case EOrderStatus.ReadyToShip:
+        CreateShipment();
+        break;
+    case EOrderStatus.Shipped:
+        NotifyShipmentCompleted();
+        break;
+    case EOrderStatus.Canceled:
+        CloseOrder();
         break;
     default:
-        Debug.Fail("unknown message type");
+        Debug.Fail("Unexpected order status: " + orderStatus);
         break;
 }
 ```
@@ -959,35 +978,36 @@ public decimal CalculateAverageUnitPrice(Order order)
 ## 9. `null` 처리 규칙
 
 - `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
-  - 호출자가 값을 전달하지 않을 수 있는 매개 변수에만 예외적으로 `null`을 허용한다.
-  - 값을 찾지 못한 상태를 반환값으로 알려야 하는 경우에만 예외적으로 `null`을 반환한다.
-- `null`을 허용하는 매개 변수와 `null`을 반환하는 메서드는 이름 뒤에 `OrNull`을 붙인다.
+  - 호출자가 값을 전달하지 않는 상황을 허용해야 할 때만 예외적으로 매개 변수에 `null`을 허용한다.
+  - 조회 실패나 생성 실패처럼 반환할 결과가 없는 상황을 호출자가 처리해야 할 때만 예외적으로 `null`을 반환한다.
+- `null`을 허용하는 매개 변수 이름에는 `OrNull`을 붙인다.
+- `null`을 반환하는 메서드 이름에는 `OrNull`을 붙인다.
 - 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
 - `null` 병합 연산자(C# 2.0)는 사용하지 않는다.
 
 좋지 않은 예:
 
 ```cs
-public Coupon GetCoupon(string? couponCodeOrNull);
-public IReadOnlyList<Order>? GetOrdersOrNull(CustomerID customerID);
+public User? FindUserByEmail(string? emailOrNull);
+public IReadOnlyList<Order>? FindOrdersOrNull(UserID userID);
 ```
 
 좋은 예:
 
 ```cs
-public Coupon? GetCouponOrNull(string? couponCodeOrNull)
+public User? FindUserByEmailOrNull(string? emailOrNull)
 {
-    if (string.IsNullOrWhiteSpace(couponCodeOrNull))
+    if (string.IsNullOrWhiteSpace(emailOrNull))
     {
         return null;
     }
 
-    return mCouponRepository.GetByCodeOrNull(couponCodeOrNull);
+    return mUserRepository.FindByEmailOrNull(emailOrNull);
 }
 
-public IReadOnlyList<Order> GetOrders(CustomerID customerID)
+public IReadOnlyList<Order> FindOrdersByUserID(UserID userID)
 {
-    return mOrderRepository.GetOrders(customerID);
+    return mOrderRepository.FindByUserID(userID);
 }
 ```
 
@@ -1004,8 +1024,8 @@ public IReadOnlyList<Order> GetOrders(CustomerID customerID)
 좋지 않은 예:
 
 ```cs
-var order = mOrderRepository.GetByID(orderID);
-var users = mUserRepository.GetAll();
+var currentUser = mUserService.FindUserByID(mCurrentUserID);
+var orders = mOrderRepository.FindAll();
 
 User user = new();
 ```
@@ -1013,20 +1033,20 @@ User user = new();
 좋은 예:
 
 ```cs
-Order order = new Order();
-List<User> users = new List<User>();
-Dictionary<ProductID, Product> productsByID = new Dictionary<ProductID, Product>();
+User currentUser = mUserService.FindUserByID(mCurrentUserID);
+IReadOnlyList<Order> orders = mOrderRepository.FindAll();
+Dictionary<OrderID, Order> ordersByID = new Dictionary<OrderID, Order>();
 
-User user = new User();
+User newUser = new User();
 ```
 
 허용 가능한 예외:
 
 ```cs
-var invoice = new Invoice();
+var newOrder = new Order();
 var ordersByID = new Dictionary<OrderID, Order>();
 
-var ordersByCustomerID = orders.GroupBy(order => order.CustomerID);
+var ordersByCustomerID = pendingOrders.GroupBy(order => order.CustomerID);
 
 foreach (var order in pendingOrders)
 {
