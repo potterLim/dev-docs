@@ -2,8 +2,9 @@
 
 ## 1. 기본 원칙
 
-이 코딩 표준은 가독성과 일관성을 최우선 가치로 삼는다.  
-코드는 단순히 동작하는 것을 넘어, 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
+이 코딩 표준은 가독성과 일관성을 최우선 가치로 삼는다.
+
+코드는 단순히 동작하는 것을 넘어 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
 
 - 가독성을 최우선으로 한다.
   - 코드는 주석 없이도 최대한 의도를 이해할 수 있어야 한다.
@@ -20,8 +21,9 @@
 - 실패 조건은 가능한 한 빠르고 분명하게 처리한다.
   - 외부 입력은 시스템 경계에서 검증한다.
   - 내부 로직은 검증된 값과 도메인 자료형을 받도록 구성한다.
+  - 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
 
-이 코딩 표준은 다음 자료를 참고하되, 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
+이 코딩 표준은 다음 자료를 참고하되 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
 
 - [.NET Runtime C# Coding Style](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md)
 - [Microsoft .NET Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
@@ -114,7 +116,7 @@ OrderApprovalService.cs
 
 ### 2.5. `partial` 클래스 파일 이름 규칙
 
-- 여러 파일이 하나의 클래스를 이룰 때, 파일 이름은 클래스 이름으로 시작한다.
+- 여러 파일이 하나의 클래스를 이룰 때 파일 이름은 클래스 이름으로 시작한다.
 - 클래스 이름 뒤에는 마침표와 세부 항목 이름을 붙인다.
 - 세부 항목 이름은 해당 파일이 맡는 책임을 드러내야 한다.
 
@@ -146,9 +148,9 @@ OrderEditorViewModel.Navigation.cs
 
 - 클래스는 `PascalCase`를 사용한다.
 - 클래스 이름은 명사 또는 명사구로 작성한다.
-- 인터페이스는 `PascalCase`를 사용하며, 이름 앞에 `I` 접두어를 사용한다.
-- 열거형은 `PascalCase`를 사용하며, 이름 앞에 `E` 접두어를 사용한다.
-- 구조체는 `PascalCase`를 사용하며, 이름 앞에 `S` 접두어를 사용한다.
+- 인터페이스는 `PascalCase`를 사용하며 이름 앞에 `I` 접두어를 사용한다.
+- 열거형은 `PascalCase`를 사용하며 이름 앞에 `E` 접두어를 사용한다.
+- 구조체는 `PascalCase`를 사용하며 이름 앞에 `S` 접두어를 사용한다.
   - 단, `readonly struct`에는 `S` 접두어를 붙이지 않는다.
 - 비트 플래그나 권한 조합처럼 플래그 성격의 열거형에는 `Flags` 접미사를 붙인다.
 - 열거형 멤버는 `PascalCase`를 사용한다.
@@ -280,7 +282,7 @@ bool shouldUpdateCache;
 - `static` 멤버 변수는 앞에 `s`를 붙이고 `PascalCase`를 사용한다.
 - 접두어 뒤에는 멤버 변수의 원래 이름을 대문자로 시작하여 이어 붙인다.
 - `bool` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
-- 상수와 상수 역할을 하는 `static readonly` 값은 `s` 접두어를 사용하지 않고, 3.6의 상수 이름 규칙을 따른다.
+- 상수와 상수 역할을 하는 `static readonly` 값은 `s` 접두어를 사용하지 않고 3.6의 상수 이름 규칙을 따른다.
 
 좋은 예:
 
@@ -288,7 +290,6 @@ bool shouldUpdateCache;
 public class UserProfile
 {
     private int mRetryCount;
-    private string mUserName = string.Empty;
     private bool mIsEnabled;
     private bool mHasPermission;
 
@@ -407,22 +408,22 @@ public class OrderService
 좋지 않은 예:
 
 ```cs
-public class UserProfile
+public class OrderSummary
 {
-    public string DisplayName = string.Empty;
+    public int CompletedOrderCount;
 }
 ```
 
 좋은 예:
 
 ```cs
-public class UserProfile
+public class OrderSummary
 {
-    public string DisplayName { get; private set; } = string.Empty;
+    public int CompletedOrderCount { get; private set; }
 
-    public void ChangeDisplayName(string displayName)
+    public void AddCompletedOrder()
     {
-        DisplayName = displayName;
+        ++CompletedOrderCount;
     }
 }
 ```
@@ -457,7 +458,12 @@ public class UserProfile
 ```cs
 public class UserProfile
 {
-    public string DisplayName { get; private set; } = string.Empty;
+    public string DisplayName { get; private set; }
+
+    public UserProfile(string displayName)
+    {
+        DisplayName = displayName;
+    }
 }
 ```
 
@@ -522,7 +528,7 @@ public static class DateTimeUtility
 
 ### 6.1. 지역 변수 선언 규칙
 
-- 지역 변수는 사용 직전에 선언하여 범위를 최소화한다.
+- 지역 변수는 필요한 시점에 선언하고 선언과 동시에 의미 있는 값으로 초기화한다.
 - 같은 범위 안에서는 지역 변수마다 서로 다른 역할이 이름에 분명히 드러나야 한다.
 
 좋지 않은 예:
@@ -836,7 +842,7 @@ public Receipt ApprovePayment(Order order)
 ### 7.2. `switch` 문 규칙
 
 - `switch` 문에는 언제나 `default:` 케이스를 넣는다.
-- `switch` 문에서 `default:` 케이스가 절대 실행될 일이 없는 경우, `default:` 안에 `Debug.Fail()`을 추가한다.
+- `switch` 문에서 `default:` 케이스가 절대 실행될 일이 없는 경우 `default:` 안에 `Debug.Fail()`을 추가한다.
 
 좋지 않은 예:
 
@@ -1111,18 +1117,19 @@ if (shouldCloseWindow)
 ### 12.3. 선언 규칙
 
 - 한 줄에 변수 하나만 선언한다.
+- 메서드 선언이 한 줄에 읽기 어려울 만큼 길면 매개 변수를 한 줄에 하나씩 나눈다.
 
 좋지 않은 예:
 
 ```cs
-int counter = 0, index = 0;
+int width = image.Width, height = image.Height;
 ```
 
 좋은 예:
 
 ```cs
-int counter = 0;
-int index = 0;
+int width = image.Width;
+int height = image.Height;
 ```
 
 ## 13. 주석 작성 규칙

@@ -4,7 +4,7 @@
 
 이 코딩 표준은 가독성과 일관성을 최우선 가치로 삼는다.
 
-코드는 단순히 동작하는 것을 넘어, 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
+코드는 단순히 동작하는 것을 넘어 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
 
 - 가독성을 최우선으로 한다.
   - 코드는 주석 없이도 최대한 의도를 이해할 수 있어야 한다.
@@ -23,10 +23,10 @@
   - 내부 로직은 검증된 값과 도메인 자료형을 받도록 구성한다.
   - 내부 함수의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
 - C++ 코드는 소유권과 수명을 명확하게 드러내야 한다.
-  - 객체를 누가 생성하고, 누가 보관하고, 누가 해제하는지 코드에서 확인할 수 있어야 한다.
+  - 객체의 생성, 보관, 해제 책임을 코드에서 확인할 수 있어야 한다.
   - 포인터, 참조, 스마트 포인터는 의미에 따라 구분해서 사용한다.
 
-이 코딩 표준은 다음 자료를 참고하되, 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
+이 코딩 표준은 다음 자료를 참고하되 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
 
 - [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
@@ -98,7 +98,7 @@ namespace order
 
 - 표준 라이브러리와 외부 라이브러리 헤더는 꺾쇠괄호(`<>`)로 포함한다.
 - 프로젝트 내부 헤더는 큰따옴표(`""`)로 포함한다.
-- `include`는 외부 헤더와 프로젝트 내부 헤더로 나누고, 외부 헤더를 먼저 둔다.
+- `include`는 외부 헤더와 프로젝트 내부 헤더로 나누고 외부 헤더를 먼저 둔다.
 - 그룹 사이에는 빈 줄 하나를 둔다.
 - 각 그룹 안에서는 알파벳 순서로 정렬한다.
 - 사용하지 않는 헤더는 남기지 않는다.
@@ -178,7 +178,7 @@ namespace order
 - 회사, 제품, 도메인, 기능 순서처럼 큰 범위에서 작은 범위로 내려가도록 작성한다.
 - 네임스페이스 이름에 밑줄(`_`)이나 대문자를 사용하지 않는다.
 - 네임스페이스 전체를 가져오는 `using namespace`는 사용하지 않는다.
-- `using` 선언과 네임스페이스 별칭은 필요한 범위에서만 사용하고, 헤더 파일에는 두지 않는다.
+- `using` 선언과 네임스페이스 별칭은 필요한 범위에서만 사용하고 헤더 파일에는 두지 않는다.
 - `.cpp` 파일에서만 사용하는 함수, 상수, 타입은 익명 네임스페이스에 둔다.
 - 헤더 파일에서는 익명 네임스페이스를 사용하지 않는다.
 
@@ -193,7 +193,7 @@ namespace awesome::shop::order
 ```cpp
 namespace
 {
-    constexpr int MAX_RETRY_COUNT = 3;
+    constexpr std::uint32_t MAX_RETRY_COUNT = 3;
 
     bool IsRetryable(EOrderError error)
     {
@@ -209,7 +209,7 @@ namespace
 - 작은 보조 타입이 필요하면 중첩 타입으로 두거나 별도 파일로 분리한다.
 - 하나의 클래스 구현을 여러 파일로 나눌 때는 클래스 이름 뒤에 밑줄과 책임을 드러내는 이름을 붙인다.
 - 플랫폼별 구현 파일은 플랫폼 이름을 파일 이름에 명시한다.
-- 공개 헤더는 공개 API만 담고, 내부 구현 보조 타입은 `.cpp` 파일이나 비공개 헤더에 둔다.
+- 공개 헤더는 공개 API만 담고 내부 구현 보조 타입은 `.cpp` 파일이나 비공개 헤더에 둔다.
 
 좋은 예:
 
@@ -254,9 +254,9 @@ constexpr T Max(T left, T right)
 
 - 클래스는 `PascalCase`를 사용한다.
 - 클래스 이름은 명사 또는 명사구로 작성한다.
-- 인터페이스는 `PascalCase`를 사용하며, 이름 앞에 `I` 접두어를 사용한다.
+- 인터페이스는 `PascalCase`를 사용하며 이름 앞에 `I` 접두어를 사용한다.
 - 구조체는 `PascalCase`를 사용한다.
-- 열거형은 `PascalCase`를 사용하며, 이름 앞에 `E` 접두어를 사용한다.
+- 열거형은 `PascalCase`를 사용하며 이름 앞에 `E` 접두어를 사용한다.
 - 비트 플래그나 권한 조합처럼 플래그 성격의 열거형에는 `Flags` 접미사를 붙인다.
 - 열거형 멤버는 모두 대문자와 밑줄을 사용한다.
 - C 스타일 `enum`보다 `enum class`를 사용한다.
@@ -360,8 +360,8 @@ private:
 좋은 예:
 
 ```cpp
-const int retryCount = order.GetRetryCount();
-const int currentPage = pageRequest.GetPage();
+const std::uint32_t retryCount = order.GetRetryCount();
+const std::uint32_t currentPage = pageRequest.GetPage();
 const std::string invoiceFilePath = invoice.GetFilePath();
 
 const std::vector<Order> pendingOrders = orderRepository.FindPendingOrders();
@@ -380,7 +380,7 @@ const bool shouldUpdateCache = cachePolicy.ShouldUpdate();
 - 접두어 뒤에는 멤버 변수의 원래 이름을 대문자로 시작하여 이어 붙인다.
 - `bool` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
 - 멤버 변수 이름은 지역 변수나 매개 변수 이름과 충돌하지 않아야 한다.
-- 상수와 상수 역할을 하는 정적 값은 `s` 접두어를 사용하지 않고, 3.5의 상수 이름 규칙을 따른다.
+- 상수와 상수 역할을 하는 정적 값은 `s` 접두어를 사용하지 않고 3.5의 상수 이름 규칙을 따른다.
 
 좋은 예:
 
@@ -388,7 +388,7 @@ const bool shouldUpdateCache = cachePolicy.ShouldUpdate();
 class UserProfile
 {
 private:
-    int mRetryCount;
+    std::uint32_t mRetryCount;
     std::string mUserName;
     bool mIsEnabled;
     bool mHasPermission;
@@ -408,8 +408,8 @@ private:
 좋은 예:
 
 ```cpp
-constexpr int DEFAULT_PAGE_SIZE = 20;
-constexpr int MAX_RETRY_COUNT = 3;
+constexpr std::uint32_t DEFAULT_PAGE_SIZE = 20;
+constexpr std::uint32_t MAX_RETRY_COUNT = 3;
 ```
 
 매크로가 필요한 경우:
@@ -489,18 +489,32 @@ private:
 - 상속을 위한 확장 지점만 `protected`로 둔다.
 - 상속을 염두에 두지 않은 클래스는 `final` 사용을 고려한다.
 
+좋지 않은 예:
+
+```cpp
+class OrderSummary
+{
+public:
+    std::uint32_t mCompletedOrderCount;
+};
+```
+
 좋은 예:
 
 ```cpp
-class Order
+class OrderSummary
 {
 public:
-    EOrderStatus GetStatus() const;
-    std::uint32_t GetTotalPriceInCents() const;
+    OrderSummary()
+        : mCompletedOrderCount(0)
+    {
+    }
+
+    std::uint32_t GetCompletedOrderCount() const;
+    void AddCompletedOrder();
 
 private:
-    EOrderStatus mStatus;
-    std::uint32_t mTotalPriceInCents;
+    std::uint32_t mCompletedOrderCount;
 };
 ```
 
@@ -539,11 +553,11 @@ public:
 struct Order
 {
 public:
-    Order(int totalPrice);
+    Order(std::uint32_t totalPriceInCents);
     virtual ~Order();
 
 private:
-    int mTotalPrice;
+    std::uint32_t mTotalPriceInCents;
 
 public:
     void Submit();
@@ -651,10 +665,10 @@ private:
 
 ### 6.1. 지역 변수 선언 규칙
 
-- 지역 변수는 사용 직전에 선언하여 범위를 최소화한다.
-- 값은 원칙적으로 읽기 전용으로 선언하고, 바뀌지 않는 지역 변수에는 `const`를 붙인다.
+- 지역 변수는 필요한 시점에 선언하고 선언과 동시에 의미 있는 값으로 초기화한다.
+  - 외부 함수가 즉시 값을 채우는 출력 변수나 곧바로 덮어쓸 큰 버퍼처럼 의도가 분명한 경우에만 초기화를 생략할 수 있다.
+- 값은 원칙적으로 읽기 전용으로 선언하고 바뀌지 않는 지역 변수에는 `const`를 붙인다.
 - 하나의 선언문에는 하나의 변수만 선언한다.
-- 초기화 없이 변수를 선언하지 않는다.
 
 좋지 않은 예:
 
@@ -680,6 +694,19 @@ void SubmitOrder(const OrderRequest& request)
     const OrderId orderId = request.GetOrderId();
 
     Submit(userId, orderId);
+}
+```
+
+초기화를 생략할 수 있는 경우:
+
+```cpp
+void ReadPacket(PacketStream& stream)
+{
+    constexpr std::size_t PACKET_BUFFER_BYTE_SIZE = 4096;
+    std::array<std::byte, PACKET_BUFFER_BYTE_SIZE> buffer;
+
+    const std::size_t byteCount = stream.Read(buffer.data(), buffer.size());
+    ProcessPacket(buffer.data(), byteCount);
 }
 ```
 
@@ -970,17 +997,17 @@ void OrderService::SubmitOrder(OrderId orderId)
 ```cpp
 std::optional<OrderId> TryParseOrderId(std::string_view text)
 {
-    std::uint64_t value = 0;
+    std::uint64_t orderIdValue;
     const char* textBegin = text.data();
     const char* textEnd = text.data() + text.size();
-    const std::from_chars_result parseResult = std::from_chars(textBegin, textEnd, value);
+    const std::from_chars_result parseResult = std::from_chars(textBegin, textEnd, orderIdValue);
 
     if (parseResult.ec != std::errc() || parseResult.ptr != textEnd)
     {
         return std::nullopt;
     }
 
-    return OrderId(value);
+    return OrderId(orderIdValue);
 }
 ```
 
@@ -1157,8 +1184,8 @@ static_assert(sizeof(OrderHeader) == ORDER_HEADER_BYTE_SIZE);
 - `nullptr`이 의미 있는 값이면 포인터로 받는다.
 - 읽기 전용 참조 매개 변수는 `const T&`로 받는다.
 - 읽기 전용 포인터 매개 변수는 포인터와 대상 중 무엇이 바뀌지 않는지 `const`로 드러낸다.
-- 출력 매개 변수는 포인터를 사용하고, 이름 앞에 `out`을 붙인다.
-- 출력 매개 변수 포인터는 `nullptr`을 허용하지 않으며, 함수 시작 지점에서 확인한다.
+- 출력 매개 변수는 포인터를 사용하고 이름 앞에 `out`을 붙인다.
+- 출력 매개 변수 포인터는 `nullptr`을 허용하지 않으며 함수 시작 지점에서 확인한다.
 
 좋지 않은 예:
 
@@ -1300,8 +1327,8 @@ void OrderProcessor::SetRepository(std::unique_ptr<OrderRepository> repository)
 ### 9.5. 동적 할당 규칙
 
 - 객체 수명을 원시 포인터의 `new`와 `delete`로 직접 관리하지 않는다.
-- 동적 할당이 필요하면 단독 소유를 기본으로 하고, `std::make_unique`를 우선 사용한다.
-- 공유 소유가 설계상 필요한 경우에만 `std::shared_ptr`로 표현하고, 생성할 때는 `std::make_shared`를 우선 사용한다.
+- 동적 할당이 필요하면 단독 소유를 기본으로 하고 `std::make_unique`를 우선 사용한다.
+- 공유 소유가 설계상 필요한 경우에만 `std::shared_ptr`로 표현하고 생성할 때는 `std::make_shared`를 우선 사용한다.
 - 배열이나 버퍼는 가능한 한 `std::array`, `std::vector`, `std::string` 같은 표준 타입으로 표현한다.
 - 메모리 블록 연산은 원칙적으로 `trivially copyable` 타입에만 사용한다.
 
@@ -1340,7 +1367,7 @@ auto repository = CreateRepository();
 좋은 예:
 
 ```cpp
-const int timeoutSeconds = 30;
+const std::uint32_t timeoutSeconds = 30;
 std::unique_ptr<OrderRepository> repository = CreateRepository();
 
 const auto it = orders.find(orderId);
@@ -1389,20 +1416,21 @@ void SaveOrder(const OrderRepository& repository, const Order& order, Order* pre
 - 한 줄에는 하나의 변수만 선언한다.
 - 관련이 없는 선언을 한 줄에 묶지 않는다.
 - 함수 선언의 반환 타입, 함수 이름, 매개 변수 목록은 한 줄에 읽히도록 작성한다.
-- 매개 변수가 길면 한 줄에 하나씩 나누고, 닫는 괄호와 세미콜론은 새 줄에 둔다.
+- 함수 선언이 한 줄에 읽기 어려울 만큼 길면 매개 변수를 한 줄에 하나씩 나눈다.
+
+좋지 않은 예:
+
+```cpp
+std::uint32_t width = image.GetWidth(), height = image.GetHeight();
+```
 
 좋은 예:
 
 ```cpp
-const int retryCount = order.GetRetryCount();
-const int timeoutSeconds = request.GetTimeoutSeconds();
-
-const std::string name = user.GetName();
-const std::string description = product.GetDescription();
+const std::uint32_t width = image.GetWidth();
+const std::uint32_t height = image.GetHeight();
 
 void SubmitOrder(OrderId orderId, PaymentId paymentId);
-
-void CreateOrder(UserId userId, AddressId addressId, PaymentMethodId paymentMethodId);
 ```
 
 ### 11.5. 초기화 목록 규칙
@@ -1432,7 +1460,7 @@ OrderService::OrderService(OrderRepository& repository, PaymentGateway& paymentG
 
 ```cpp
 constexpr float DEFAULT_MOVEMENT_SPEED = 1.5f;
-constexpr int DEFAULT_TIMEOUT_MILLISECONDS = 30'000;
+constexpr std::uint32_t DEFAULT_TIMEOUT_MILLISECONDS = 30'000;
 ```
 
 ## 12. 주석 작성 규칙
