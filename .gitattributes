@@ -1,7 +1,11 @@
-# Normalize text files.
-* text=auto
+# Normalize text files to LF for cross-platform development.
+* text=auto eol=lf
 
-# Documentation files use LF line endings.
+# Windows command scripts use CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Documentation files.
 *.md text eol=lf
 *.html text eol=lf
 
