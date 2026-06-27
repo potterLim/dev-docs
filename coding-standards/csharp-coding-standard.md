@@ -909,7 +909,27 @@ switch (orderStatus)
 }
 ```
 
-### 7.3. 람다 사용 규칙
+### 7.3. 반복문 규칙
+
+- 컬렉션 전체를 순회할 때는 `foreach` 문을 우선한다.
+- 인덱스가 필요한 경우에만 `for` 문을 사용한다.
+- 반복 중 컬렉션을 수정해야 한다면 안전한 수정 방식이 분명해야 한다.
+
+좋은 예:
+
+```cs
+foreach (Order order in orders)
+{
+    SubmitOrder(order);
+}
+
+for (int index = 0; index < orders.Count; ++index)
+{
+    UpdateOrderPosition(orders[index], index);
+}
+```
+
+### 7.4. 람다 사용 규칙
 
 - 인라인 람다는 한 줄짜리 짧은 코드로 제한한다.
 - 여러 작업을 수행하는 람다는 메서드나 명시적인 반복문으로 분리한다.
@@ -934,7 +954,7 @@ foreach (Order order in orders)
 }
 ```
 
-### 7.4. 리소스 해제 규칙
+### 7.5. 리소스 해제 규칙
 
 - `using` 선언(C# 8.0)은 사용하지 않는다.
 - 리소스의 수명 범위가 코드 블록에 드러나도록 `using` 문을 사용한다.
@@ -1130,6 +1150,31 @@ int width = image.Width, height = image.Height;
 ```cs
 int width = image.Width;
 int height = image.Height;
+```
+
+### 12.4. 리터럴 표기 규칙
+
+- `float` 리터럴에는 `f` 접미사를 붙인다.
+- `decimal` 리터럴에는 `m` 접미사를 붙인다.
+- `long` 리터럴 접미사가 필요한 경우 대문자 `L`을 사용한다.
+- 큰 숫자는 밑줄(`_`)로 자릿수를 구분할 수 있다.
+- 매직 넘버를 직접 쓰지 말고 의미 있는 상수로 분리한다.
+- 단위가 있는 숫자는 상수 이름에 단위를 드러낸다.
+
+좋지 않은 예:
+
+```cs
+float taxRate = (float)0.1;
+decimal minimumOrderAmountWon = 19900M;
+long paymentTimeoutMilliseconds = 3000l;
+```
+
+좋은 예:
+
+```cs
+const float DEFAULT_TAX_RATE = 0.1f;
+const decimal MINIMUM_ORDER_AMOUNT_WON = 19_900m;
+const long PAYMENT_TIMEOUT_MILLISECONDS = 3_000L;
 ```
 
 ## 13. 주석 작성 규칙
