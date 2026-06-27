@@ -1455,6 +1455,7 @@ OrderService::OrderService(OrderRepository& repository, PaymentGateway& paymentG
 - `float` 리터럴에는 `f` 접미사를 붙인다.
 - 큰 숫자는 읽기 쉽도록 자리 구분자를 사용한다.
 - 매직 넘버를 직접 쓰지 말고 의미 있는 상수로 분리한다.
+- 단위가 있는 숫자는 상수 이름에 단위를 드러낸다.
 
 좋은 예:
 
