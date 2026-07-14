@@ -838,7 +838,7 @@ private:
 
 ```cpp
 void SetPaymentStatus(int status);
-void FindOrder(std::uint64_t id);
+Order FindOrder(std::uint64_t id);
 void SaveOrder(OrderId orderId, bool shouldSendNotification);
 void CreateOrder(UserId userId, AddressId addressId, PaymentMethodId paymentMethodId);
 ```
@@ -884,7 +884,7 @@ private:
 };
 
 void SetPaymentStatus(EPaymentStatus status);
-void FindOrder(OrderId orderId);
+Order FindOrder(OrderId orderId);
 void SaveOrderAndNotify(OrderId orderId);
 void CreateOrder(const CreateOrderRequest& request);
 ```
