@@ -632,24 +632,20 @@ public IReadOnlyList<Order> SearchOrders(SearchKeyword searchKeyword, int pageNu
 
 ### 6.5. 변수 가리기 금지
 
-- 변수 가리기(variable shadowing)는 허용하지 않는다.
-- 외부 변수가 동일한 이름을 사용 중이라면 내부 변수에는 다른 이름을 사용한다.
+- 안쪽 범위의 이름이 바깥쪽 범위의 이름을 가리지 않게 한다.
+- 멤버 변수와 매개 변수의 이름이 충돌하지 않게 한다.
+- IDE 또는 정적 분석 도구에서 변수 가리기를 감지할 수 있으면 경고를 활성화한다.
 
 좋지 않은 예:
 
 ```cs
 public class OrderService
 {
-    private int mRetryCount;
+    private IOrderRepository mOrderRepository;
 
-    public void SubmitOrders(int mRetryCount)
+    public OrderService(IOrderRepository mOrderRepository)
     {
-        if (mRetryCount <= 0)
-        {
-            return;
-        }
-
-        SubmitNextOrder(mRetryCount);
+        mOrderRepository = mOrderRepository;
     }
 }
 ```
@@ -659,16 +655,11 @@ public class OrderService
 ```cs
 public class OrderService
 {
-    private int mRetryCount;
+    private readonly IOrderRepository mOrderRepository;
 
-    public void SubmitOrders(int maxRetryCount)
+    public OrderService(IOrderRepository orderRepository)
     {
-        int orderCount = mOrderRepository.CountPendingOrders();
-
-        for (int i = 0; i < orderCount; ++i)
-        {
-            SubmitNextOrder(maxRetryCount);
-        }
+        mOrderRepository = orderRepository;
     }
 }
 ```
