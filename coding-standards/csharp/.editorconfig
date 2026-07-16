@@ -43,6 +43,9 @@ dotnet_diagnostic.IDE0005.severity = error
 # Treat formatting violations as errors.
 dotnet_diagnostic.IDE0055.severity = error
 
+# Detect values that are overwritten before they are read.
+dotnet_diagnostic.IDE0059.severity = error
+
 # Do not expose instance fields as public or protected API.
 dotnet_diagnostic.CA1051.severity = error
 dotnet_code_quality.CA1051.api_surface = public
@@ -86,8 +89,11 @@ csharp_preserve_single_line_statements = false
 # ------------------------------------------------------------
 
 # Prefer using blocks over using declarations.
-# Built-in analyzers may not reliably flag every using declaration, so code review or a custom analyzer must enforce this rule when needed.
+# This preference prevents suggestions to use using declarations, but existing declarations still require code review or a custom analyzer.
 csharp_prefer_simple_using_statement = false:error
+
+# Do not suggest converting explicit object creation to target-typed new.
+# Existing new() expressions still require code review or a custom analyzer.
 csharp_style_implicit_object_creation_when_type_is_apparent = false:error
 
 # The coding standard allows var only when the type is obvious, unavoidable, or clearer for LINQ/anonymous types.
@@ -97,7 +103,7 @@ csharp_style_var_elsewhere = false:suggestion
 csharp_style_var_when_type_is_apparent = false:suggestion
 
 # Prefer out variables declared on the previous line.
-# Some toolchains may not report every inline out declaration, so code review still matters here.
+# Existing inline out declarations may still require code review or a custom analyzer.
 csharp_style_inlined_variable_declaration = false:error
 
 # Do not suggest converting explicit null checks into ?? expressions.
@@ -105,7 +111,7 @@ csharp_style_inlined_variable_declaration = false:error
 dotnet_style_coalesce_expression = false:error
 
 # Object initializers are generally discouraged, but required/init-only immutable objects remain valid by the coding standard.
-# Keep this advisory.
+# Built-in analyzers may not report existing object initializers, so keep this advisory.
 dotnet_style_object_initializer = false:suggestion
 dotnet_style_readonly_field = true:error
 
@@ -180,7 +186,11 @@ dotnet_naming_rule.private_fields_should_start_with_m.style = private_field_styl
 
 dotnet_naming_rule.private_static_fields_should_start_with_s.severity = error
 dotnet_naming_rule.private_static_fields_should_start_with_s.symbols = private_static_fields
-dotnet_naming_rule.private_static_fields_should_start_with_s.style = private_static_field_style
+dotnet_naming_rule.private_static_fields_should_start_with_s.style = static_field_style
+
+dotnet_naming_rule.static_fields_should_start_with_s.severity = error
+dotnet_naming_rule.static_fields_should_start_with_s.symbols = static_fields
+dotnet_naming_rule.static_fields_should_start_with_s.style = static_field_style
 
 # const fields are implicitly static, so they need a more specific rule to avoid being treated as ordinary private static fields with an s prefix.
 dotnet_naming_rule.private_constants_should_be_uppercase.severity = error
@@ -242,6 +252,9 @@ dotnet_naming_symbols.private_static_fields.applicable_kinds = field
 dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_static_fields.required_modifiers = static
 
+dotnet_naming_symbols.static_fields.applicable_kinds = field
+dotnet_naming_symbols.static_fields.required_modifiers = static
+
 dotnet_naming_symbols.private_constants.applicable_kinds = field
 dotnet_naming_symbols.private_constants.applicable_accessibilities = private
 dotnet_naming_symbols.private_constants.required_modifiers = const
@@ -269,8 +282,8 @@ dotnet_naming_style.enum_style.capitalization = pascal_case
 dotnet_naming_style.private_field_style.required_prefix = m
 dotnet_naming_style.private_field_style.capitalization = pascal_case
 
-dotnet_naming_style.private_static_field_style.required_prefix = s
-dotnet_naming_style.private_static_field_style.capitalization = pascal_case
+dotnet_naming_style.static_field_style.required_prefix = s
+dotnet_naming_style.static_field_style.capitalization = pascal_case
 
 dotnet_naming_style.uppercase_style.capitalization = all_upper
 
