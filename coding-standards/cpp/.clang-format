@@ -55,6 +55,7 @@ AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
 AllowShortLambdasOnASingleLine: None
+InsertBraces: true
 
 # =========================
 # Pointers / references
@@ -95,7 +96,7 @@ IncludeCategories:
 #
 # Avoid aggressive vertical alignment to keep diffs small.
 # =========================
-AlignAfterOpenBracket: false
+AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments: None
 AlignConsecutiveBitFields: None
