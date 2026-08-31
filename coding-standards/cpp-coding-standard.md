@@ -138,7 +138,7 @@ namespace order
     class OrderService
     {
     public:
-        std::vector<Order> GetOrders() const;
+        [[nodiscard]] std::vector<Order> GetOrders() const;
     };
 }
 ```
@@ -195,7 +195,7 @@ namespace
 {
     constexpr std::uint32_t MAX_RETRY_COUNT = 3;
 
-    bool IsRetryable(EOrderError error)
+    [[nodiscard]] bool IsRetryable(EOrderError error)
     {
         return error == EOrderError::TIMEOUT;
     }
@@ -232,7 +232,7 @@ FileSystem_mac.cpp
 좋은 예:
 
 ```cpp
-std::filesystem::path GetConfigDirectory()
+[[nodiscard]] std::filesystem::path GetConfigDirectory()
 {
 #if AWESOME_PLATFORM_WINDOWS
     return GetWindowsConfigDirectory();
@@ -242,7 +242,7 @@ std::filesystem::path GetConfigDirectory()
 }
 
 template <typename T>
-constexpr T Max(T left, T right)
+[[nodiscard]] constexpr T Max(T left, T right)
 {
     return left < right ? right : left;
 }
@@ -336,8 +336,8 @@ inline EPermissionFlags operator|(EPermissionFlags left, EPermissionFlags right)
 class OrderService
 {
 public:
-    EOrderStatus GetOrderStatus() const;
-    bool CanSubmitOrder(OrderId orderId) const;
+    [[nodiscard]] EOrderStatus GetOrderStatus() const;
+    [[nodiscard]] bool CanSubmitOrder(OrderId orderId) const;
 
 private:
     void validateOrderTreeRecursive(const OrderNode& node) const;
@@ -455,7 +455,7 @@ public:
     void SubmitOrder(OrderId orderId);
 
 private:
-    bool canSubmitOrder(OrderId orderId) const;
+    [[nodiscard]] bool canSubmitOrder(OrderId orderId) const;
 
 public:
     explicit OrderService(OrderRepository& repository);
@@ -473,7 +473,7 @@ public:
     void SubmitOrder(OrderId orderId);
 
 private:
-    bool canSubmitOrder(OrderId orderId) const;
+    [[nodiscard]] bool canSubmitOrder(OrderId orderId) const;
 
     OrderRepository& mRepository;
 };
@@ -510,7 +510,7 @@ public:
     {
     }
 
-    std::uint32_t GetCompletedOrderCount() const;
+    [[nodiscard]] std::uint32_t GetCompletedOrderCount() const;
     void AddCompletedOrder();
 
 private:
@@ -534,7 +534,7 @@ public:
     void MarkAsPaid(PaymentId paymentId);
     void Cancel(CancelReason reason);
 
-    EOrderStatus GetStatus() const;
+    [[nodiscard]] EOrderStatus GetStatus() const;
 };
 ```
 
@@ -588,7 +588,7 @@ struct OrderSummary
 class Order
 {
 public:
-    EOrderStatus GetStatus() const;
+    [[nodiscard]] EOrderStatus GetStatus() const;
 };
 ```
 
@@ -606,19 +606,19 @@ class IPaymentGateway
 public:
     virtual ~IPaymentGateway() = default;
 
-    virtual PaymentResult ApprovePayment(const PaymentRequest& request) = 0;
+    [[nodiscard]] virtual PaymentResult ApprovePayment(const PaymentRequest& request) = 0;
 };
 
 class HttpPaymentGateway final : public IPaymentGateway
 {
 public:
-    PaymentResult ApprovePayment(const PaymentRequest& request) override;
+    [[nodiscard]] PaymentResult ApprovePayment(const PaymentRequest& request) override;
 };
 
 class CachingPaymentGateway : public IPaymentGateway
 {
 public:
-    PaymentResult ApprovePayment(const PaymentRequest& request) override final;
+    [[nodiscard]] PaymentResult ApprovePayment(const PaymentRequest& request) override final;
 };
 ```
 
@@ -747,8 +747,8 @@ const std::size_t sourceByteIndex = sourceRowOffset + sourceColumnOffset + chann
 class UserRepository
 {
 public:
-    User Search(UserId userId) const;
-    std::vector<User> Search(std::string_view keyword) const;
+    [[nodiscard]] User Search(UserId userId) const;
+    [[nodiscard]] std::vector<User> Search(std::string_view keyword) const;
 };
 ```
 
@@ -758,8 +758,8 @@ public:
 class UserRepository
 {
 public:
-    User FindById(UserId userId) const;
-    std::vector<User> SearchByKeyword(std::string_view keyword) const;
+    [[nodiscard]] User FindById(UserId userId) const;
+    [[nodiscard]] std::vector<User> SearchByKeyword(std::string_view keyword) const;
 };
 ```
 
@@ -838,7 +838,7 @@ private:
 
 ```cpp
 void SetPaymentStatus(int status);
-Order FindOrder(std::uint64_t id);
+[[nodiscard]] Order FindOrder(std::uint64_t id);
 void SaveOrder(OrderId orderId, bool shouldSendNotification);
 void CreateOrder(UserId userId, AddressId addressId, PaymentMethodId paymentMethodId);
 ```
@@ -851,7 +851,7 @@ class OrderId
 public:
     explicit OrderId(std::uint64_t value);
 
-    std::uint64_t GetValue() const;
+    [[nodiscard]] std::uint64_t GetValue() const;
 
 private:
     std::uint64_t mValue;
@@ -873,9 +873,9 @@ public:
         PaymentMethodId paymentMethodId
     );
 
-    UserId GetUserId() const;
-    AddressId GetAddressId() const;
-    PaymentMethodId GetPaymentMethodId() const;
+    [[nodiscard]] UserId GetUserId() const;
+    [[nodiscard]] AddressId GetAddressId() const;
+    [[nodiscard]] PaymentMethodId GetPaymentMethodId() const;
 
 private:
     UserId mUserId;
@@ -884,7 +884,7 @@ private:
 };
 
 void SetPaymentStatus(EPaymentStatus status);
-Order FindOrder(OrderId orderId);
+[[nodiscard]] Order FindOrder(OrderId orderId);
 void SaveOrderAndNotify(OrderId orderId);
 void CreateOrder(const CreateOrderRequest& request);
 ```
@@ -923,7 +923,7 @@ const OrderMessage& orderMessage = message.AsOrderMessage();
 좋은 예:
 
 ```cpp
-std::vector<Order> GetOrders();
+[[nodiscard]] std::vector<Order> GetOrders();
 constexpr std::size_t POSITION_COMPONENT_COUNT = 3;
 const std::array<float, POSITION_COMPONENT_COUNT> position = { 0.0f, 0.0f, 0.0f };
 
@@ -995,7 +995,7 @@ void OrderService::SubmitOrder(OrderId orderId)
 `std::optional<T>` 반환을 사용하는 경우:
 
 ```cpp
-std::optional<OrderId> TryParseOrderId(std::string_view text)
+[[nodiscard]] std::optional<OrderId> TryParseOrderId(std::string_view text)
 {
     std::uint64_t orderIdValue;
     const char* textBegin = text.data();
@@ -1014,7 +1014,7 @@ std::optional<OrderId> TryParseOrderId(std::string_view text)
 출력 객체를 재사용해야 하는 경우:
 
 ```cpp
-bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount)
+[[nodiscard]] bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount)
 {
     Assert(outPayloadBuffer != nullptr);
     Assert(outByteCount != nullptr);
@@ -1030,6 +1030,47 @@ bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* o
     *outByteCount = ReadPayloadInto(*outPayloadBuffer);
     return true;
 }
+```
+
+### 6.11. 반환값 사용 규칙
+
+- 반환값을 무시하면 오류 처리가 누락되거나 호출 자체가 의미를 잃는 함수에는 `[[nodiscard]]`를 붙인다.
+- 성공 여부, 오류 정보, 소유권이 있는 객체, 이후 호출에 필요한 값을 반환하는 함수에 우선 적용한다.
+- 상태를 변경하지 않고 결과만 제공하는 함수는 반환값을 버린 호출이 분명히 무의미한 경우에 적용한다.
+- 반환값을 반드시 처리해야 하는 결과 자료형은 자료형 자체에 `[[nodiscard]]`를 붙인다.
+- 함수가 값을 반환한다는 이유만으로 `[[nodiscard]]`를 일률적으로 붙이지 않는다.
+- 무시했을 때 발생하는 문제가 이름과 자료형으로 분명하지 않으면 `[[nodiscard("...")]]`에 이유를 적는다.
+- 의도적으로 반환값을 무시할 때는 `static_cast<void>(...)` 또는 결과 자료형이 제공하는 명시적인 처리 함수를 사용한다.
+
+좋은 예:
+
+```cpp
+class OrderRepository
+{
+public:
+    [[nodiscard]] std::optional<Order> TryFindOrder(OrderId orderId) const;
+    [[nodiscard]] bool TrySaveOrder(const Order& order);
+};
+```
+
+반환값이 수명을 표현하는 경우:
+
+```cpp
+[[nodiscard("Keep the returned registration alive while observing orders.")]]
+OrderObserverRegistration RegisterOrderObserver(OrderObserver& observer);
+```
+
+결과 자료형을 반드시 처리해야 하는 경우:
+
+```cpp
+template <typename TValue, typename TError>
+class [[nodiscard]] Result;
+```
+
+반환값을 의도적으로 무시하는 경우:
+
+```cpp
+static_cast<void>(mCache.TryWarm());
 ```
 
 ## 7. 제어문 규칙
@@ -1208,7 +1249,7 @@ void SubmitOrder(OrderRepository& repository, OrderId orderId)
 출력 매개 변수 선언 예:
 
 ```cpp
-bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount);
+[[nodiscard]] bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount);
 ```
 
 ### 9.2. `nullptr` 처리 규칙
@@ -1226,7 +1267,7 @@ if (order == NULL)
     return;
 }
 
-std::vector<Order>* GetOrders();
+[[nodiscard]] std::vector<Order>* GetOrders();
 ```
 
 좋은 예:
@@ -1237,7 +1278,7 @@ if (order == nullptr)
     return;
 }
 
-std::vector<Order> GetOrders();
+[[nodiscard]] std::vector<Order> GetOrders();
 ```
 
 ### 9.3. 소유권 표현 규칙
@@ -1298,7 +1339,7 @@ private:
 좋지 않은 예:
 
 ```cpp
-Order CreateOrder()
+[[nodiscard]] Order CreateOrder()
 {
     Order order;
     return std::move(order);
@@ -1308,7 +1349,7 @@ Order CreateOrder()
 좋은 예:
 
 ```cpp
-Order CreateOrder()
+[[nodiscard]] Order CreateOrder()
 {
     Order order;
     return order;
@@ -1512,7 +1553,7 @@ const PaymentResult paymentResult = paymentGateway.ApproveOrFallback(paymentRequ
  * Returns: Pointer to the active order owned by the repository, or `nullptr` when the order exists but is not active.
  * Lifetime: The returned pointer remains valid until the repository is modified.
  */
-const Order* FindActiveOrderOrNull(OrderId orderId) const;
+[[nodiscard]] const Order* FindActiveOrderOrNull(OrderId orderId) const;
 ```
 
 ### 12.2. 인라인 주석 규칙
@@ -1551,11 +1592,11 @@ if (paymentResponse.StatusCode == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE)
 
 ```cpp
 // Checks whether the user can cancel the order.
-bool Check(User user, Order order);
+[[nodiscard]] bool Check(User user, Order order);
 ```
 
 좋은 예:
 
 ```cpp
-bool CanUserCancelOrder(const User& user, const Order& order);
+[[nodiscard]] bool CanUserCancelOrder(const User& user, const Order& order);
 ```
