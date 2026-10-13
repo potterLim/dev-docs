@@ -4,29 +4,15 @@
 
 이 코딩 표준은 가독성과 일관성을 최우선 가치로 삼는다.
 
-코드는 단순히 동작하는 것을 넘어 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
+- 코드의 의도가 이름과 구조에 드러나게 작성한다.
+- 복잡한 기법보다 명확한 표현을 우선한다.
+- 자동 서식은 프로젝트의 서식 설정을 따른다.
+- 같은 개념에는 같은 이름을 사용한다.
+- 자료형으로 값의 의미를 표현한다.
+- 실패 조건은 빠르고 분명하게 처리한다.
+- 소유권과 수명을 명확하게 드러낸다.
 
-- 가독성을 최우선으로 한다.
-  - 코드는 주석 없이도 최대한 의도를 이해할 수 있어야 한다.
-  - 복잡한 로직은 트릭보다 명확한 표현을 우선한다.
-- 특별한 이유가 없는 한 IDE의 자동 서식 규칙을 따른다.
-  - Visual Studio의 `Format Document(문서 서식 지정)` 기능을 기본으로 사용한다.
-  - 개인 취향보다 팀 전체의 일관성을 우선한다.
-- 이름은 역할과 의도를 드러내야 한다.
-  - 축약어, 애매한 약어, 임의의 줄임말보다 명확한 이름을 사용한다.
-  - 같은 개념에는 같은 이름을 사용한다.
-- 자료형은 의미를 표현해야 한다.
-  - 함수의 매개 변수와 반환값은 가능한 한 강타입으로 설계한다.
-  - 문자열, 숫자, 불리언으로 의미를 암묵적으로 전달하는 설계를 지양한다.
-- 실패 조건은 가능한 한 빠르고 분명하게 처리한다.
-  - 외부 입력은 시스템 경계에서 검증한다.
-  - 내부 로직은 검증된 값과 도메인 자료형을 받도록 구성한다.
-  - 내부 함수의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
-- C++ 코드는 소유권과 수명을 명확하게 드러내야 한다.
-  - 객체의 생성, 보관, 해제 책임을 코드에서 확인할 수 있어야 한다.
-  - 포인터, 참조, 스마트 포인터는 의미에 따라 구분해서 사용한다.
-
-이 코딩 표준은 다음 자료를 참고하되 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
+참고 자료:
 
 - [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
@@ -102,7 +88,6 @@ namespace order
 - 그룹 사이에는 빈 줄 하나를 둔다.
 - 각 그룹 안에서는 알파벳 순서로 정렬한다.
 - 사용하지 않는 헤더는 남기지 않는다.
-- 헤더 파일에서 `using namespace`를 사용하지 않는다.
 
 좋은 예:
 
@@ -122,7 +107,6 @@ namespace order
 - 공개 헤더에는 내부 구현 세부 사항과 플랫폼별 세부 사항을 노출하지 않는다.
 - 헤더 안의 함수 정의는 짧은 접근자, 템플릿, `constexpr`처럼 헤더에 있어야 하는 경우로 제한한다.
 - 헤더에 정의하는 함수나 변수는 `ODR` 위반이 발생하지 않도록 `inline` 또는 템플릿 규칙을 지킨다.
-- 공개 API와 내부 구현 세부 사항은 분명히 구분한다.
 
 좋은 예:
 
@@ -188,7 +172,7 @@ namespace awesome::shop::order
 }
 ```
 
-파일 내부 전용 구현 예:
+익명 네임스페이스:
 
 ```cpp
 namespace
@@ -206,6 +190,7 @@ namespace
 
 - 하나의 클래스는 기본적으로 하나의 헤더 파일과 하나의 소스 파일로 구성한다.
 - 파일 이름은 대소문자까지 포함해서 클래스 이름과 일치해야 한다.
+  - 분할 구현 파일과 플랫폼별 구현 파일은 아래의 파일 이름 규칙을 따른다.
 - 작은 보조 타입이 필요하면 중첩 타입으로 두거나 별도 파일로 분리한다.
 - 하나의 클래스 구현을 여러 파일로 나눌 때는 클래스 이름 뒤에 밑줄과 책임을 드러내는 이름을 붙인다.
 - 플랫폼별 구현 파일은 플랫폼 이름을 파일 이름에 명시한다.
@@ -242,7 +227,7 @@ FileSystem_mac.cpp
 }
 
 template <typename T>
-[[nodiscard]] constexpr T Max(T left, T right)
+[[nodiscard]] constexpr T GetMax(T left, T right)
 {
     return left < right ? right : left;
 }
@@ -322,7 +307,6 @@ inline EPermissionFlags operator|(EPermissionFlags left, EPermissionFlags right)
 ### 3.2. 함수와 멤버 함수 이름 규칙
 
 - 함수 이름은 반드시 동사 또는 동사구로 시작한다.
-- 가능하면 `동사 + 목적어` 형태로 작성한다.
 - 반환값이 있는 함수는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 함수는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
@@ -351,7 +335,6 @@ private:
 - 값의 의미, 역할, 상태, 개수, 위치가 드러나야 한다.
 - 의미 없는 축약어, 임의의 약어, 단일 문자 변수 이름은 사용하지 않는다.
   - 단, 짧은 반복문 인덱스처럼 관례적으로 명확한 경우는 예외로 한다.
-- 단순 반복문 변수가 아닌 경우 `i`, `e` 같은 변수 이름 대신 `index`, `employee`처럼 변수에 담긴 값을 바로 알 수 있는 이름을 사용한다.
 - 컨테이너는 복수형으로 작성한다.
 - 키-값 대응 컨테이너는 가능하면 `xxxByYyy` 형태를 사용한다.
 - `bool` 변수는 `is`, `has`, `can`, `should`를 우선 사용한다.
@@ -377,9 +360,7 @@ const bool shouldUpdateCache = cachePolicy.ShouldUpdate();
 
 - 인스턴스 멤버 변수는 앞에 `m`을 붙이고 `PascalCase`를 사용한다.
 - 정적 멤버 변수는 앞에 `s`를 붙이고 `PascalCase`를 사용한다.
-- 접두어 뒤에는 멤버 변수의 원래 이름을 대문자로 시작하여 이어 붙인다.
 - `bool` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
-- 멤버 변수 이름은 지역 변수나 매개 변수 이름과 충돌하지 않아야 한다.
 - 상수와 상수 역할을 하는 정적 값은 `s` 접두어를 사용하지 않고 3.5의 상수 이름 규칙을 따른다.
 
 좋은 예:
@@ -442,6 +423,8 @@ constexpr std::uint32_t MAX_RETRY_COUNT = 3;
 
 - 접근 지정자는 같은 종류의 멤버를 묶을 때 사용한다.
 - 같은 접근 지정자를 필요 이상으로 반복해서 클래스 구조를 흐리지 않는다.
+- 중첩 타입은 해당 접근 영역의 다른 멤버보다 앞에 둔다.
+- 비공개 또는 보호 생성자와 소멸자는 해당 접근 영역의 멤버 함수보다 앞에 둔다.
 
 좋지 않은 예:
 
@@ -484,7 +467,8 @@ private:
 ### 5.1. 접근 지정자 규칙
 
 - 멤버 변수는 기본적으로 `private`으로 둔다.
-- `public` 멤버 변수는 사용하지 않는다.
+- 클래스의 `public` 멤버 변수는 사용하지 않는다.
+  - 데이터용 `struct`는 5.3절의 규칙을 따른다.
 - 외부에서 필요한 동작만 `public`으로 공개한다.
 - 상속을 위한 확장 지점만 `protected`로 둔다.
 - 상속을 염두에 두지 않은 클래스는 `final` 사용을 고려한다.
@@ -577,9 +561,7 @@ struct OrderSummary
 
 ### 5.4. `const` 멤버 함수 규칙
 
-- 멤버 함수는 읽기 전용을 기본으로 설계한다.
 - 객체 상태를 변경하지 않는 멤버 함수에는 반드시 `const`를 붙인다.
-- 객체 상태를 변경해야 하는 경우에만 `const`를 제거한다.
 - 논리적으로 읽기 전용인 함수는 내부 캐시를 사용하더라도 호출자 관점의 불변성을 유지해야 한다.
 
 좋은 예:
@@ -595,6 +577,8 @@ public:
 ### 5.5. 상속과 가상 함수 규칙
 
 - 재정의하는 가상 함수에는 언제나 `override`를 붙인다.
+- 다형적 기반 클래스에서 기반 타입을 통한 파괴를 허용하면 소멸자는 `public virtual`로 선언한다.
+  - 기반 타입을 통한 파괴를 허용하지 않으면 소멸자는 `protected`로 선언한다.
 - 더 이상 상속되면 안 되는 클래스나 가상 함수에는 `final`을 붙인다.
 - `override`와 `final`을 함께 사용할 때는 `override final` 순서로 작성한다.
 
@@ -625,39 +609,38 @@ public:
 ### 5.6. 멤버 초기화 규칙
 
 - 생성자에서는 멤버 초기화 목록을 사용한다.
-- 멤버 선언 순서와 초기화 목록 순서를 일치시킨다.
 - 생성자 본문에서 대입으로 초기화하지 않는다.
 - 대입을 막기 위한 목적으로 `const` 멤버 변수나 참조 멤버 변수를 남용하지 않는다.
 
 좋지 않은 예:
 
 ```cpp
-class OrderService
+class Order
 {
 public:
-    OrderService(OrderRepository& repository)
+    explicit Order(std::uint32_t totalPriceInCents)
     {
-        mRepository = &repository;
+        mTotalPriceInCents = totalPriceInCents;
     }
 
 private:
-    OrderRepository* mRepository;
+    std::uint32_t mTotalPriceInCents;
 };
 ```
 
 좋은 예:
 
 ```cpp
-class OrderService
+class Order
 {
 public:
-    explicit OrderService(OrderRepository& repository)
-        : mRepository(repository)
+    explicit Order(std::uint32_t totalPriceInCents)
+        : mTotalPriceInCents(totalPriceInCents)
     {
     }
 
 private:
-    OrderRepository& mRepository;
+    std::uint32_t mTotalPriceInCents;
 };
 ```
 
@@ -668,6 +651,7 @@ private:
 - 지역 변수는 필요한 시점에 선언하고 선언과 동시에 의미 있는 값으로 초기화한다.
   - 외부 함수가 즉시 값을 채우는 출력 변수나 곧바로 덮어쓸 큰 버퍼처럼 의도가 분명한 경우에만 초기화를 생략할 수 있다.
 - 값은 원칙적으로 읽기 전용으로 선언하고 바뀌지 않는 지역 변수에는 `const`를 붙인다.
+  - 값으로 반환하거나 이동할 지역 객체는 이동 가능성을 유지하기 위해 `const`를 생략할 수 있다.
 - 하나의 선언문에는 하나의 변수만 선언한다.
 
 좋지 않은 예:
@@ -710,10 +694,9 @@ void ReadPacket(PacketStream& stream)
 }
 ```
 
-### 6.2. 긴 표현식 분리 규칙
+### 6.2. 복잡한 표현식 분리 규칙
 
-- 인덱스, 오프셋, 크기, 주소 계산처럼 여러 의미가 섞인 계산을 하나의 표현식에 몰아넣지 않는다.
-- 표현식이 길어지면 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
+- 복잡한 표현식은 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
 - 중간 계산값은 가능한 한 `const` 지역 변수로 선언한다.
 - 중간 변수 이름은 계산 방식보다 값의 의미를 드러내야 한다.
 - 단순히 줄 길이를 줄이기 위한 `temp`, `value`, `result` 같은 이름은 사용하지 않는다.
@@ -737,8 +720,7 @@ const std::size_t sourceByteIndex = sourceRowOffset + sourceColumnOffset + chann
 ### 6.3. 함수 오버로딩 규칙
 
 - 함수 오버로딩은 의미가 같고 입력 형태만 다를 때만 사용한다.
-- 반환형만 다른 오버로딩은 사용할 수 없다.
-- 이름이 같은 함수가 서로 다른 책임을 수행하지 않게 한다.
+- 의미가 다른 함수는 이름을 분리한다.
 - `const` 객체와 비 `const` 객체를 모두 지원하기 위한 오버로딩은 허용한다.
 
 좋지 않은 예:
@@ -767,21 +749,13 @@ public:
 
 - 기본 매개 변수보다 명시적인 오버로드를 우선 사용한다.
 - 기본 매개 변수를 사용할 때는 호출자가 생략해도 의미가 분명한 값만 사용한다.
-- 기본값은 `0`, `nullptr`, 빈 객체처럼 비트 수준에서 단순한 값을 우선한다.
 - 헤더에 노출되는 기본 매개 변수는 변경 시 호출 코드의 의미가 바뀔 수 있으므로 신중하게 사용한다.
-
-좋지 않은 예:
-
-```cpp
-void ExportReport(bool shouldIncludeMetadata = true, bool shouldCompress = false);
-```
 
 좋은 예:
 
 ```cpp
-void ExportReport();
-void ExportReportWithMetadata();
-void ExportCompressedReport();
+void ExportReport(const Report& report);
+void ExportReport(const Report& report, const ExportOptions& options);
 ```
 
 ### 6.5. 변수 가리기 금지
@@ -829,6 +803,8 @@ private:
 - 정해진 선택지는 `enum class`로 표현한다.
 - 도메인 의미가 있는 값은 전용 자료형으로 감싸는 것을 우선 검토한다.
 - 전용 자료형은 가능한 한 불변으로 설계한다.
+- 값 객체를 비교하거나 컨테이너의 키로 사용하면 값에 따른 동등성 비교와 필요한 해시 또는 정렬 기준을 제공한다.
+- 전용 자료형과 매개 변수 객체의 유효성은 생성 시 또는 시스템 경계에서 검증한다.
 - 값으로 반환하는 타입에는 `const`를 붙이지 않는다.
 - 관련된 여러 매개 변수는 별도의 객체로 묶는 것을 우선 검토한다.
 - 의미가 다른 동일 자료형 매개 변수를 나란히 받는 설계를 피한다.
@@ -870,8 +846,7 @@ public:
     CreateOrderRequest(
         UserId userId,
         AddressId addressId,
-        PaymentMethodId paymentMethodId
-    );
+        PaymentMethodId paymentMethodId);
 
     [[nodiscard]] UserId GetUserId() const;
     [[nodiscard]] AddressId GetAddressId() const;
@@ -913,10 +888,9 @@ const OrderMessage& orderMessage = message.AsOrderMessage();
 
 ### 6.8. 컨테이너 사용 규칙
 
-- 크기 상한이 분명한 데이터는 고정 크기 컨테이너를 우선한다.
-- 크기가 변하는 데이터에는 표준 컨테이너를 사용한다.
+- 원소 수가 고정된 데이터에는 `std::array` 같은 고정 크기 컨테이너를 우선한다.
+- 원소 수가 변하는 데이터에는 `std::vector` 같은 가변 크기 컨테이너를 사용한다.
 - 동적 컨테이너에 많은 값을 추가할 때는 필요한 크기를 미리 예약한다.
-- 컨테이너를 반환할 때는 널 포인터 대신 빈 컨테이너를 반환한다.
 - 컨테이너를 읽기만 하는 함수는 `const` 참조로 받는다.
 - 컨테이너 내부 원소의 포인터나 참조를 외부에 오래 보관하지 않는다.
 
@@ -927,8 +901,11 @@ const OrderMessage& orderMessage = message.AsOrderMessage();
 constexpr std::size_t POSITION_COMPONENT_COUNT = 3;
 const std::array<float, POSITION_COMPONENT_COUNT> position = { 0.0f, 0.0f, 0.0f };
 
+// Precondition: orders and newOrders refer to different containers.
 void AddOrders(std::vector<Order>& orders, const std::vector<Order>& newOrders)
 {
+    Assert(&orders != &newOrders);
+
     orders.reserve(orders.size() + newOrders.size());
     orders.insert(orders.end(), newOrders.begin(), newOrders.end());
 }
@@ -940,7 +917,6 @@ void AddOrders(std::vector<Order>& orders, const std::vector<Order>& newOrders)
 - 검증 실패는 시스템 경계에서 즉시 처리한다.
 - 내부 함수는 이미 검증된 값과 도메인 자료형을 받는다고 가정한다.
 - 내부 함수의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
-- 검증 실패는 이 문서의 오류 처리 방식과 일관되게 표현한다.
 
 좋지 않은 예:
 
@@ -991,6 +967,8 @@ void OrderService::SubmitOrder(OrderId orderId)
 - `bool + out` 패턴은 출력 객체 재사용, 여러 결과 기록, 성능상 이유, 기존 API 호환처럼 이유가 분명할 때만 사용한다.
 - 같은 모듈에서는 `std::optional<T>` 반환과 `bool + out` 패턴을 같은 의미로 섞지 않는다.
 - 실패 원인을 호출자에게 전달해야 하면 오류 코드나 전용 결과 타입처럼 호출자가 처리할 수 있는 형태로 반환한다.
+- 같은 모듈에서는 일관된 오류 처리 방식을 사용한다.
+- 예외를 잡고 아무 처리 없이 무시하지 않는다.
 
 `std::optional<T>` 반환을 사용하는 경우:
 
@@ -1035,12 +1013,8 @@ void OrderService::SubmitOrder(OrderId orderId)
 ### 6.11. 반환값 사용 규칙
 
 - 반환값을 무시하면 오류 처리가 누락되거나 호출 자체가 의미를 잃는 함수에는 `[[nodiscard]]`를 붙인다.
-- 성공 여부, 오류 정보, 소유권이 있는 객체, 이후 호출에 필요한 값을 반환하는 함수에 우선 적용한다.
-- 상태를 변경하지 않고 결과만 제공하는 함수는 반환값을 버린 호출이 분명히 무의미한 경우에 적용한다.
-- 반환값을 반드시 처리해야 하는 결과 자료형은 자료형 자체에 `[[nodiscard]]`를 붙인다.
 - 함수가 값을 반환한다는 이유만으로 `[[nodiscard]]`를 일률적으로 붙이지 않는다.
-- 무시했을 때 발생하는 문제가 이름과 자료형으로 분명하지 않으면 `[[nodiscard("...")]]`에 이유를 적는다.
-- 의도적으로 반환값을 무시할 때는 `static_cast<void>(...)` 또는 결과 자료형이 제공하는 명시적인 처리 함수를 사용한다.
+- 의도적으로 반환값을 무시할 때는 `static_cast<void>(...)`로 표시한다.
 
 좋은 예:
 
@@ -1051,20 +1025,6 @@ public:
     [[nodiscard]] std::optional<Order> TryFindOrder(OrderId orderId) const;
     [[nodiscard]] bool TrySaveOrder(const Order& order);
 };
-```
-
-반환값이 수명을 표현하는 경우:
-
-```cpp
-[[nodiscard("Keep the returned registration alive while observing orders.")]]
-OrderObserverRegistration RegisterOrderObserver(OrderObserver& observer);
-```
-
-결과 자료형을 반드시 처리해야 하는 경우:
-
-```cpp
-template <typename TValue, typename TError>
-class [[nodiscard]] Result;
 ```
 
 반환값을 의도적으로 무시하는 경우:
@@ -1103,7 +1063,7 @@ void SubmitOrder(const OrderRequest& request)
 ### 7.2. `switch` 문 규칙
 
 - `switch` 문에는 언제나 `default`를 작성한다.
-- 처리할 수 없는 값은 `default`에서 즉시 실패가 드러나게 한다.
+- 처리할 수 없는 값은 `default`에서 assertion으로 표시한다.
 - 의도적인 fallthrough는 명시적으로 표시한다.
 - 여러 `case`가 같은 동작을 수행하면 빈 `case`를 연속해서 배치한다.
 
@@ -1138,7 +1098,7 @@ case EOrderStatus::PENDING:
     Prepare(order);
     [[fallthrough]];
 
-case EOrderStatus::READY:
+case EOrderStatus::PAID:
     Submit(order);
     break;
 
@@ -1174,7 +1134,7 @@ for (std::size_t index = 0; index < orders.size(); ++index)
 - 람다는 짧고 지역적인 동작에만 사용한다.
 - 캡처 목록은 명시적으로 작성한다.
 - 긴 람다나 여러 곳에서 재사용되는 람다는 함수로 분리한다.
-- 캡처한 객체의 수명이 람다보다 짧아질 수 있으면 람다를 저장하지 않는다.
+- 람다를 저장할 때는 참조로 캡처한 객체와 원시 포인터 대상의 수명을 보장한다.
 
 좋은 예:
 
@@ -1191,9 +1151,38 @@ const bool hasHighValueOrder = std::any_of(orders.begin(), orders.end(), isHighV
 
 ### 7.5. `goto` 사용 규칙
 
-- `goto`는 사용하지 않는다.
+- `goto`는 원칙적으로 사용하지 않는다.
 - 낮은 수준의 정리 코드처럼 불가피한 경우에는 함수 범위를 작게 유지한다.
 - `goto` 레이블은 모두 대문자와 밑줄을 사용한다.
+
+### 7.6. 삼항연산자 사용 규칙
+
+- 삼항연산자(`?:`)는 단순한 값 선택에 사용한다.
+- 분기 구조를 한눈에 파악하기 어려우면 `if/else`로 작성한다.
+- 한 줄을 기본으로 하며, 두 결과의 비교에 도움이 될 때만 줄을 나눈다.
+- 여러 줄로 작성할 때는 `?`와 `:`를 각각 다음 줄의 시작에 같은 들여쓰기로 배치한다.
+
+좋지 않은 예:
+
+```cpp
+const std::uint32_t shippingFeeInCents = isFreeShipping
+    ? 0
+    : standardShippingFeeInCents;
+```
+
+좋은 예:
+
+```cpp
+const std::uint32_t shippingFeeInCents = isFreeShipping ? 0 : standardShippingFeeInCents;
+```
+
+여러 줄로 두 결과를 비교하는 경우:
+
+```cpp
+const ShippingQuote shippingQuote = isExpressDelivery
+    ? CalculateExpressShippingQuote(order, deliveryAddress)
+    : CalculateStandardShippingQuote(order, deliveryAddress);
+```
 
 ## 8. `assert` 사용 규칙
 
@@ -1221,7 +1210,7 @@ static_assert(sizeof(OrderHeader) == ORDER_HEADER_BYTE_SIZE);
 
 ### 9.1. 참조와 포인터 선택 규칙
 
-- `nullptr`이 허용되지 않는 필수 객체는 참조로 받는다.
+- 출력 매개 변수를 제외하고, `nullptr`이 허용되지 않는 필수 객체는 참조로 받는다.
 - `nullptr`이 의미 있는 값이면 포인터로 받는다.
 - 읽기 전용 참조 매개 변수는 `const T&`로 받는다.
 - 읽기 전용 포인터 매개 변수는 포인터와 대상 중 무엇이 바뀌지 않는지 `const`로 드러낸다.
@@ -1246,10 +1235,14 @@ void SubmitOrder(OrderRepository& repository, OrderId orderId)
 }
 ```
 
-출력 매개 변수 선언 예:
+출력 매개 변수:
 
 ```cpp
-[[nodiscard]] bool PacketReader::TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount);
+class PacketReader
+{
+public:
+    [[nodiscard]] bool TryReadPayload(PacketBuffer* outPayloadBuffer, std::size_t* outByteCount);
+};
 ```
 
 ### 9.2. `nullptr` 처리 규칙
@@ -1287,6 +1280,7 @@ if (order == nullptr)
 - 단독 소유는 `std::unique_ptr`로 표현한다.
 - 공유 소유는 설계상 필요한 경우에만 `std::shared_ptr`로 표현한다.
 - 소유하지 않는 필수 객체는 참조로 표현한다.
+  - 출력 매개 변수는 9.1절의 포인터 규칙을 따른다.
 - 소유하지 않는 선택 객체는 원시 포인터로 표현한다.
 - 원시 포인터만 보고 소유권을 추측해야 하는 API를 만들지 않는다.
 
@@ -1369,9 +1363,10 @@ void OrderProcessor::SetRepository(std::unique_ptr<OrderRepository> repository)
 
 - 객체 수명을 원시 포인터의 `new`와 `delete`로 직접 관리하지 않는다.
 - 동적 할당이 필요하면 단독 소유를 기본으로 하고 `std::make_unique`를 우선 사용한다.
-- 공유 소유가 설계상 필요한 경우에만 `std::shared_ptr`로 표현하고 생성할 때는 `std::make_shared`를 우선 사용한다.
+- 공유 소유 객체는 `std::make_shared`로 생성하는 것을 우선한다.
 - 배열이나 버퍼는 가능한 한 `std::array`, `std::vector`, `std::string` 같은 표준 타입으로 표현한다.
 - 메모리 블록 연산은 원칙적으로 `trivially copyable` 타입에만 사용한다.
+- 파일, 소켓, 잠금처럼 해제가 필요한 자원은 `RAII` 객체로 수명을 관리한다.
 
 좋지 않은 예:
 
@@ -1418,13 +1413,11 @@ const auto it = orders.find(orderId);
 
 ### 11.1. 들여쓰기 규칙
 
-- 탭(tab)은 Visual Studio 기본값을 사용한다.
-- Visual Studio를 사용하지 않을 때는 공백 4칸을 들여쓰기 기준으로 사용한다.
-- 탭과 공백을 같은 파일에서 섞지 않는다.
+- 들여쓰기는 공백 4칸을 사용한다.
 
 ### 11.2. 중괄호 사용 규칙
 
-- 여는 중괄호는 새 줄에 작성한다.
+- 네임스페이스, 타입, 함수, 제어문의 여는 중괄호는 새 줄에 작성한다.
 - 한 줄짜리 제어문에도 중괄호를 사용한다.
 - `else`, `catch`는 닫는 중괄호 다음 줄에 작성한다.
 
@@ -1444,7 +1437,6 @@ else
 ### 11.3. 포인터와 참조 표기 규칙
 
 - 포인터와 참조 기호는 타입에 붙인다.
-- 포인터와 참조를 한 줄에서 섞어 선언하지 않는다.
 
 좋은 예:
 
@@ -1455,9 +1447,8 @@ void SaveOrder(const OrderRepository& repository, const Order& order, Order* pre
 ### 11.4. 선언 규칙
 
 - 한 줄에는 하나의 변수만 선언한다.
-- 관련이 없는 선언을 한 줄에 묶지 않는다.
-- 함수 선언의 반환 타입, 함수 이름, 매개 변수 목록은 한 줄에 읽히도록 작성한다.
-- 함수 선언이 한 줄에 읽기 어려울 만큼 길면 매개 변수를 한 줄에 하나씩 나눈다.
+- 함수 선언의 반환 타입, 함수 이름, 매개 변수 목록은 한 줄을 기본으로 작성한다.
+- 함수 선언의 매개 변수 목록은 한눈에 파악하기 어려울 때 11.7절의 기준에 따라 나눈다.
 
 좋지 않은 예:
 
@@ -1501,8 +1492,44 @@ OrderService::OrderService(OrderRepository& repository, PaymentGateway& paymentG
 좋은 예:
 
 ```cpp
-constexpr float DEFAULT_MOVEMENT_SPEED = 1.5f;
+constexpr float DEFAULT_MOVEMENT_SPEED_METERS_PER_SECOND = 1.5f;
 constexpr std::uint32_t DEFAULT_TIMEOUT_MILLISECONDS = 30'000;
+```
+
+### 11.7. 줄바꿈과 빈 줄 규칙
+
+- 줄바꿈은 글자 수가 아니라 의미와 구조의 가독성을 기준으로 결정한다.
+- 단순한 표현식, 함수 호출, 선언은 한 줄을 기본으로 작성한다.
+- 조건식이나 계산식을 나눌 때는 의미 단위로 나눈다.
+- 매개 변수와 인자 목록은 한눈에 파악하기 어려울 때만 나누고, 나누면 항목마다 한 줄씩 배치한다.
+- 데이터 목록은 의미 있는 묶음이나 구조가 드러나도록 배치한다.
+- 빈 줄은 논리적인 처리 단계를 구분할 때 사용한다.
+
+좋지 않은 예:
+
+```cpp
+const Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(order, paymentMethod, deliveryOptions,
+    notificationOptions);
+```
+
+좋은 예:
+
+```cpp
+const Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(order, paymentMethod, deliveryOptions, notificationOptions);
+```
+
+```cpp
+const Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(
+    order,
+    paymentMethod,
+    deliveryOptions,
+    notificationOptions);
 ```
 
 ## 12. 주석 작성 규칙
@@ -1512,7 +1539,7 @@ constexpr std::uint32_t DEFAULT_TIMEOUT_MILLISECONDS = 30'000;
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
 - 공개 API에는 호출자가 알아야 하는 계약이 있을 때만 문서 주석을 작성한다.
-- 문서 주석에는 매개 변수의 의미와 단위, 수명 조건, `nullptr` 허용 여부, 반환값, 실패 처리 방식, 호출 순서, 스레드 안전성처럼 호출자가 알아야 하는 계약을 적는다.
+- 문서 주석에는 입력 제약, 반환값, 실패 시 동작, 수명 등 호출에 필요한 계약을 적는다.
 - 임시 주석, 죽은 코드, 오래된 TODO는 남기지 않는다.
 - TODO에는 담당자나 추적 가능한 이슈 번호를 함께 적는다.
 
@@ -1536,21 +1563,21 @@ if (paymentAttempt.IsRecentlySubmitted(clock.Now()))
 }
 ```
 
-TODO를 남겨야 하는 경우:
+TODO:
 
 ```cpp
 // TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
 const PaymentResult paymentResult = paymentGateway.ApproveOrFallback(paymentRequest);
 ```
 
-공개 API의 호출 계약을 명시해야 하는 경우:
+공개 API 계약:
 
 ```cpp
 /**
  * Finds an active order by ID.
  *
  * Precondition: `orderId` has already been validated by the caller.
- * Returns: Pointer to the active order owned by the repository, or `nullptr` when the order exists but is not active.
+ * Returns: Pointer to the active order owned by the repository, or `nullptr` when no active order with the given ID exists.
  * Lifetime: The returned pointer remains valid until the repository is modified.
  */
 [[nodiscard]] const Order* FindActiveOrderOrNull(OrderId orderId) const;
@@ -1558,8 +1585,7 @@ const PaymentResult paymentResult = paymentGateway.ApproveOrFallback(paymentRequ
 
 ### 12.2. 인라인 주석 규칙
 
-- 인라인 주석은 줄 끝에 길게 붙이지 않는다.
-- 코드 위에 독립된 줄로 작성한다.
+- 주석은 줄 끝에 붙이지 않고 코드 위에 독립된 줄로 작성한다.
 
 좋지 않은 예:
 

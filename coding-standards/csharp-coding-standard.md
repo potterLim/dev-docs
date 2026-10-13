@@ -4,26 +4,14 @@
 
 이 코딩 표준은 가독성과 일관성을 최우선 가치로 삼는다.
 
-코드는 단순히 동작하는 것을 넘어 읽는 사람이 빠르고 정확하게 의도를 이해할 수 있어야 한다.
+- 코드의 의도가 이름과 구조에 드러나게 작성한다.
+- 복잡한 기법보다 명확한 표현을 우선한다.
+- 자동 서식은 프로젝트의 서식 설정을 따른다.
+- 같은 개념에는 같은 이름을 사용한다.
+- 자료형으로 값의 의미를 표현한다.
+- 실패 조건은 빠르고 분명하게 처리한다.
 
-- 가독성을 최우선으로 한다.
-  - 코드는 주석 없이도 최대한 의도를 이해할 수 있어야 한다.
-  - 복잡한 로직은 트릭보다 명확한 표현을 우선한다.
-- 특별한 이유가 없는 한 IDE의 자동 서식 규칙을 따른다.
-  - Visual Studio의 `Code Cleanup(코드 정리)` 기능을 기본으로 사용한다.
-  - 개인 취향보다 팀 전체의 일관성을 우선한다.
-- 이름은 역할과 의도를 드러내야 한다.
-  - 축약어, 애매한 약어, 임의의 줄임말보다 명확한 이름을 사용한다.
-  - 같은 개념에는 같은 이름을 사용한다.
-- 자료형은 의미를 표현해야 한다.
-  - 메서드의 매개 변수와 반환값은 가능한 한 강타입으로 설계한다.
-  - 문자열, 숫자, 불리언으로 의미를 암묵적으로 전달하는 설계를 지양한다.
-- 실패 조건은 가능한 한 빠르고 분명하게 처리한다.
-  - 외부 입력은 시스템 경계에서 검증한다.
-  - 내부 로직은 검증된 값과 도메인 자료형을 받도록 구성한다.
-  - 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
-
-이 코딩 표준은 다음 자료를 참고하되 실제 개발 환경에서의 가독성과 유지보수성을 고려하여 일부 항목을 현실적으로 조정하였다.
+참고 자료:
 
 - [.NET Runtime C# Coding Style](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md)
 - [Microsoft .NET Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
@@ -48,6 +36,7 @@ namespace OrderProcessing;
 
 public class OrderService
 {
+    public IReadOnlyList<Order> PendingOrders { get; } = new List<Order>().AsReadOnly();
 }
 ```
 
@@ -89,6 +78,7 @@ public class OrderApprovalService
 - 클래스는 각각 독립된 소스 파일에 있어야 한다.
   - 단, 파일을 분리하는 것보다 함께 두는 편이 읽기 쉬운 작은 보조 클래스는 예외를 허용한다.
 - 파일 이름은 대소문자까지 포함해서 반드시 클래스 이름과 일치해야 한다.
+  - `partial` 클래스의 파일 이름은 2.5절의 규칙을 따른다.
 
 좋지 않은 예:
 
@@ -206,7 +196,6 @@ public enum EPermissionFlags
 ### 3.2. 메서드 이름 규칙
 
 - 메서드 이름은 반드시 동사 또는 동사구로 시작한다.
-- 가능하면 `동사 + 목적어` 형태로 작성한다.
 - 반환값이 있는 메서드는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 메서드는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
@@ -241,11 +230,11 @@ private User findUserById(UserId userId);
 ### 3.3. 변수 이름 규칙
 
 - 지역 변수와 메서드의 매개 변수 이름은 `camelCase`를 사용한다.
+  - 공개 프로퍼티를 생성하는 위치 기반 record 매개 변수는 프로퍼티 이름 규칙에 따라 `PascalCase`를 사용한다.
 - 변수 이름은 명사 또는 명사구를 사용한다.
 - 값의 의미, 역할, 상태, 개수, 위치가 드러나야 한다.
 - 의미 없는 축약어, 임의의 약어, 단일 문자 변수 이름은 사용하지 않는다.
   - 단, 짧은 반복문 인덱스처럼 관례적으로 명확한 경우는 예외로 한다.
-- 단순 반복문 변수가 아닌 경우 `i`, `e` 같은 변수 이름 대신 `index`, `employee`처럼 변수에 담긴 값을 바로 알 수 있는 이름을 사용한다.
 - 컬렉션은 복수형으로 작성한다.
 - 키-값 대응 컬렉션은 가능하면 `xxxByYyy` 형태를 사용한다.
 - `bool` 변수는 `is`, `has`, `can`, `should`를 우선 사용한다.
@@ -280,7 +269,6 @@ bool shouldUpdateCache;
 
 - `private` 인스턴스 멤버 변수는 앞에 `m`을 붙이고 `PascalCase`를 사용한다.
 - `static` 멤버 변수는 앞에 `s`를 붙이고 `PascalCase`를 사용한다.
-- 접두어 뒤에는 멤버 변수의 원래 이름을 대문자로 시작하여 이어 붙인다.
 - `bool` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
 - 상수와 상수 역할을 하는 `static readonly` 값은 `s` 접두어를 사용하지 않고 3.6의 상수 이름 규칙을 따른다.
 
@@ -314,8 +302,8 @@ public bool ShouldRefresh { get; private set; }
 ### 3.6. 상수 이름 규칙
 
 - 상수의 이름은 모두 대문자와 밑줄을 사용한다.
-- 객체 값을 상수처럼 사용할 때는 `static readonly`를 사용한다.
-- 상수로 사용하는 `static readonly` 멤버 변수는 모두 대문자와 밑줄을 사용한다.
+- 상수 역할의 객체는 `static readonly`로 선언하고 같은 이름 규칙을 따른다.
+- 공개하는 상수 객체는 내부 상태도 변경할 수 없도록 설계한다.
 
 좋지 않은 예:
 
@@ -336,20 +324,19 @@ public static readonly CurrencyInfo DEFAULT_CURRENCY = new CurrencyInfo("KRW");
 
 클래스 내부 구성은 다음 순서를 따른다.
 
-1. 멤버 변수
-2. 프로퍼티
+1. 중첩 타입
+2. 멤버 변수: 상수를 먼저 둔다.
+3. 프로퍼티
    - 단, 프로퍼티와 대응하는 `private` 멤버 변수는 프로퍼티 바로 위에 적는다.
-3. 생성자
-4. 메서드
-   - `public` -> `private` 순서로 배치한다.
+4. 이벤트
+5. 생성자
+6. 메서드
+   - `public` -> `protected internal` -> `protected` -> `internal` -> `private protected` -> `private` 순서로 배치한다.
 
 추가 원칙은 다음과 같다.
 
-- 공개 메서드가 먼저 보이도록 배치한다.
-- 필요에 따라 관련된 멤버끼리 논리적으로 묶어 배치할 수 있다.
-- `private` 헬퍼 메서드는 이를 사용하는 `public` 메서드 아래쪽에 배치한다.
-- 오버로드된 메서드는 서로 떨어뜨리지 않고 함께 배치한다.
-- 멤버 변수는 연관 있는 것끼리 그룹으로 묶는다.
+- 관련된 멤버는 위의 구성 순서를 유지하면서 논리적으로 묶는다.
+- 같은 접근 수준의 오버로드된 메서드는 서로 떨어뜨리지 않고 함께 배치한다.
 
 좋은 예:
 
@@ -404,6 +391,7 @@ public class OrderService
 - 같은 어셈블리 내부 구현에만 필요한 타입과 멤버는 `internal` 사용을 검토한다.
 - 외부에서 직접 변경하면 안 되는 상태는 `private` 멤버 변수와 제한된 setter로 보호한다.
 - `public` 멤버 변수는 사용하지 않는다.
+  - 상수와 상수 역할을 하는 `static readonly` 필드는 예외로 한다.
 
 좋지 않은 예:
 
@@ -439,16 +427,16 @@ public class OrderSummary
 ```cs
 public class UserProfile
 {
-    private string mDisplayName;
+    private readonly string mDisplayName;
+
+    public UserProfile(string displayName)
+    {
+        mDisplayName = displayName;
+    }
 
     public string GetDisplayName()
     {
         return mDisplayName;
-    }
-
-    public void SetDisplayName(string displayName)
-    {
-        mDisplayName = displayName;
     }
 }
 ```
@@ -458,7 +446,7 @@ public class UserProfile
 ```cs
 public class UserProfile
 {
-    public string DisplayName { get; private set; }
+    public string DisplayName { get; }
 
     public UserProfile(string displayName)
     {
@@ -467,7 +455,7 @@ public class UserProfile
 }
 ```
 
-의미 있는 상태 변경을 표현하는 메서드 예:
+상태 변경 메서드:
 
 ```cs
 public class UserProfile
@@ -483,10 +471,11 @@ public class UserProfile
 
 ### 5.3. 읽기 전용 값 규칙
 
-- 초기화 후 값이 변하지 않는 변수는 `readonly`로 선언한다.
-- 프로퍼티에 `private init`(C# 9.0)을 가능한 한 사용한다.
-- 객체 초기자(object initializer)는 지양한다.
-  - 단, `required` 한정자(C# 11.0)와 초기화 전용 setter(C# 9.0)로 불변 객체를 구성할 때는 허용한다.
+- 생성 후 재대입하지 않는 멤버 변수는 `readonly`로 선언한다.
+- `readonly`는 필드의 재대입만 막는다.
+  - 객체 전체를 불변으로 유지하려면 참조 대상의 변경도 막는다.
+- 생성 후 값이 바뀌지 않는 프로퍼티에는 `get` 전용 또는 `private init`(C# 9.0)을 사용한다.
+- 객체 초기자(object initializer)는 지양하되, `required`와 공개 `init`으로 불변 객체를 구성할 때는 허용한다.
 
 좋은 예:
 
@@ -519,7 +508,7 @@ public static class DateTimeUtility
 {
     public static DateTime GetStartOfDay(DateTime dateTime)
     {
-        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
+        return dateTime.Date;
     }
 }
 ```
@@ -529,6 +518,7 @@ public static class DateTimeUtility
 ### 6.1. 지역 변수 선언 규칙
 
 - 지역 변수는 필요한 시점에 선언하고 선언과 동시에 의미 있는 값으로 초기화한다.
+  - 즉시 이어지는 호출이 값을 대입하는 `out` 변수는 초기화를 생략한다.
 - 같은 범위 안에서는 지역 변수마다 서로 다른 역할이 이름에 분명히 드러나야 한다.
 
 좋지 않은 예:
@@ -553,10 +543,9 @@ if (order.HasDiscountCoupon())
 }
 ```
 
-### 6.2. 긴 표현식 분리 규칙
+### 6.2. 복잡한 표현식 분리 규칙
 
-- 인덱스, 오프셋, 크기, 좌표 계산처럼 여러 의미가 섞인 계산을 하나의 표현식에 몰아넣지 않는다.
-- 표현식이 길어지면 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
+- 복잡한 표현식은 의미 있는 계산 단위로 나누어 지역 변수에 담는다.
 - 중간 변수 이름은 계산 방식보다 값의 의미를 드러내야 한다.
 - 단순히 줄 길이를 줄이기 위한 `temp`, `value`, `result` 같은 이름은 사용하지 않는다.
 - 한눈에 이해되는 단순 표현식은 불필요하게 나누지 않는다.
@@ -578,9 +567,8 @@ int sourceByteIndex = sourceRowOffset + sourceColumnOffset + channelIndex;
 
 ### 6.3. 메서드 오버로딩 규칙
 
-- 매개 변수 자료형만 다른 모호한 오버로딩은 지양한다.
-- 이름만으로도 동작 차이가 드러나야 한다.
-- 같은 자료형을 매개 변수로 받지만 의미가 다른 메서드는 이름을 분리한다.
+- 메서드 오버로딩은 의미가 같고 입력 형태만 다를 때만 사용한다.
+- 의미가 다른 메서드는 이름을 분리한다.
 
 좋지 않은 예:
 
@@ -599,7 +587,7 @@ public IReadOnlyList<User> SearchUsersByKeyword(SearchKeyword searchKeyword);
 ### 6.4. 기본 매개 변수 규칙
 
 - 기본 매개 변수보다 명시적인 메서드 오버로딩을 우선 사용한다.
-- 기본 매개 변수를 사용하는 경우 기본값의 의미가 분명한 `null`, `false`, `0` 같은 값을 사용한다.
+- 기본 매개 변수를 사용할 때는 호출자가 생략해도 의미가 분명한 값만 사용한다.
 
 좋은 예:
 
@@ -621,10 +609,10 @@ public void SendOrder(Order order, EOrderDeliveryMethod deliveryMethod)
 }
 ```
 
-허용 가능한 예:
+기본 매개 변수를 허용하는 경우:
 
 ```cs
-public IReadOnlyList<Order> SearchOrders(SearchKeyword searchKeyword, int pageNumber = 0)
+public IReadOnlyList<Order> SearchOrders(SearchKeyword searchKeyword, int pageNumber = 1)
 {
     return mOrderRepository.Search(searchKeyword, pageNumber);
 }
@@ -690,6 +678,7 @@ bool isParsed = int.TryParse(text, out parsedValue);
 - 정해진 선택지는 `enum`으로 표현한다.
 - 도메인 의미가 있는 값은 전용 자료형으로 감싸는 것을 우선 검토한다.
 - 전용 자료형은 가능한 한 불변으로 설계한다.
+- 전용 자료형과 매개 변수 객체의 유효성은 생성 시 또는 시스템 경계에서 검증한다.
 - 범용적인 값을 강타입으로 만들 때는 `readonly record struct`(C# 10.0)를 우선 검토한다.
 - 관련된 여러 매개 변수는 별도의 객체로 묶는 것을 우선 검토한다.
 - 의미가 다른 동일 자료형 매개 변수를 나란히 받는 설계를 피한다.
@@ -712,6 +701,10 @@ public IReadOnlyList<User> SortUsers(IReadOnlyList<User> users, ESortOrder sortO
 
 #### 전용 자료형 사용 예
 
+- 시스템 경계에서 사용자 ID가 양수인지 검증한다.
+- 시스템 경계에서 검색어가 `null`·빈 문자열·공백 문자열이 아닌지 검증한다.
+- 구조체의 기본값도 검증 대상에 포함한다.
+
 ```cs
 public readonly record struct UserId(long Value);
 public readonly record struct SearchKeyword(string Value);
@@ -728,6 +721,9 @@ public IReadOnlyList<User> SearchUsers(SearchKeyword searchKeyword)
 ```
 
 #### 매개 변수 객체 사용 예
+
+- 검색 조건은 시스템 경계에서 검증한다.
+- `required`는 초기화 누락만 막는다.
 
 ```cs
 public sealed class OrderSearchCriteria
@@ -768,21 +764,30 @@ public void SaveOrder(Order order, ESaveMode saveMode);
 
 - `System.Collections`의 비제네릭 컬렉션보다 `System.Collections.Generic`의 제네릭 컬렉션을 사용한다.
 - 일반 배열을 사용하는 것도 허용한다.
+- 공개 API에는 필요한 기능을 표현하는 컬렉션 인터페이스를 우선한다.
+- 외부에서 변경하면 안 되는 컬렉션은 변경 가능한 내부 컬렉션을 그대로 노출하지 않는다.
+- 읽기만 필요한 목록은 `IReadOnlyList<T>`로 표현한다.
+  - 읽기 전용 인터페이스는 참조 대상과 요소 전체의 불변성을 보장하지 않는다.
 
 좋은 예:
 
 ```cs
 List<Order> completedOrders = new List<Order>();
 Dictionary<UserId, User> usersById = new Dictionary<UserId, User>();
-string[] fileNames = new string[10];
+string[] fileNames = new string[fileCount];
 ```
 
-### 6.9. 입력 검증 규칙
+### 6.9. 입력 검증 및 오류 처리 규칙
 
 - 외부 입력은 시스템 경계에서 검증한다.
 - 검증 실패는 시스템 경계에서 즉시 처리한다.
 - 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
 - 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
+
+- 예상 가능한 실패는 `Try` 패턴이나 전용 결과 타입처럼 호출자가 처리할 수 있는 형태로 표현한다.
+- 실패 여부를 반환하는 호출은 결과를 확인한 뒤 후속 처리를 진행한다.
+- 같은 모듈에서는 일관된 오류 처리 방식을 사용한다.
+- 예외를 잡고 아무 처리 없이 무시하지 않는다.
 
 좋은 예:
 
@@ -832,8 +837,8 @@ public Receipt ApprovePayment(Order order)
 
 ### 7.2. `switch` 문 규칙
 
-- `switch` 문에는 언제나 `default:` 케이스를 넣는다.
-- `switch` 문에서 `default:` 케이스가 절대 실행될 일이 없는 경우 `default:` 안에 `Debug.Fail()`을 추가한다.
+- `switch` 문에는 언제나 `default`를 작성한다.
+- 처리할 수 없는 값은 `default`에서 assertion으로 표시한다.
 
 좋지 않은 예:
 
@@ -850,31 +855,6 @@ switch (orderStatus)
 ```
 
 좋은 예:
-
-```cs
-switch (orderStatus)
-{
-    case EOrderStatus.Pending:
-        RequestPayment();
-        break;
-    case EOrderStatus.Paid:
-        PrepareShipping();
-        break;
-    case EOrderStatus.ReadyToShip:
-        CreateShipment();
-        break;
-    case EOrderStatus.Shipped:
-        NotifyShipmentCompleted();
-        break;
-    case EOrderStatus.Canceled:
-        CloseOrder();
-        break;
-    default:
-        break;
-}
-```
-
-도달할 수 없다고 가정하는 경우:
 
 ```cs
 switch (orderStatus)
@@ -966,11 +946,40 @@ using (StreamReader reader = new StreamReader(filePath))
 }
 ```
 
+### 7.6. 삼항연산자 사용 규칙
+
+- 삼항연산자(`?:`)는 단순한 값 선택에 사용한다.
+- 분기 구조를 한눈에 파악하기 어려우면 `if/else`로 작성한다.
+- 한 줄을 기본으로 하며, 두 결과의 비교에 도움이 될 때만 줄을 나눈다.
+- 여러 줄로 작성할 때는 `?`와 `:`를 각각 다음 줄의 시작에 같은 들여쓰기로 배치한다.
+
+좋지 않은 예:
+
+```cs
+decimal shippingFee = isFreeShipping
+    ? 0m
+    : standardShippingFee;
+```
+
+좋은 예:
+
+```cs
+decimal shippingFee = isFreeShipping ? 0m : standardShippingFee;
+```
+
+여러 줄로 두 결과를 비교하는 경우:
+
+```cs
+ShippingQuote shippingQuote = isExpressDelivery
+    ? CalculateExpressShippingQuote(order, deliveryAddress)
+    : CalculateStandardShippingQuote(order, deliveryAddress);
+```
+
 ## 8. `Debug.Assert()` 사용 규칙
 
 - `Debug.Assert()`는 코드가 전제로 삼는 내부 불변식과 사전 조건을 확인할 때 사용한다.
-- 특정 조건이 반드시 충족되어야 한다고 가정한 지점에는 `Debug.Assert()`를 둔다.
 - `Debug.Assert()`는 외부 입력 검증이나 복구 가능한 오류 처리 수단으로 사용하지 않는다.
+- `Debug.Assert()` 안의 표현식에 부수 효과를 넣지 않는다.
 
 좋은 예:
 
@@ -1067,7 +1076,12 @@ foreach (var order in pendingOrders)
 - 비동기 메서드 이름에는 `Async` 접미사를 붙인다.
 - 비동기 메서드는 `Task` 또는 `Task<T>`를 반환한다.
 - 성능상 필요한 경우에만 `ValueTask` 또는 `ValueTask<T>`를 사용할 수 있다.
-- `async void`는 사용하지 않는다.
+- `async void`는 `void` 반환이 필요한 이벤트 핸들러에만 허용한다.
+- 이벤트 핸들러의 비동기 작업은 `Task`를 반환하는 메서드로 분리한다.
+- 비동기 작업의 완료는 `await`로 기다린다.
+  - `.Result`나 `.Wait()`를 통한 동기 대기는 지양한다.
+- 시작한 비동기 작업의 완료와 예외를 확인한다.
+- 취소를 지원하는 작업에는 `CancellationToken`을 받고 하위 호출에 전달한다.
 
 좋지 않은 예:
 
@@ -1102,12 +1116,12 @@ public async Task<Receipt> SubmitOrderAsync(Order order, CancellationToken cance
 
 ### 12.1. 들여쓰기 규칙
 
-- 탭(tab)은 Visual Studio 기본값을 사용한다.
-- Visual Studio를 사용하지 않을 때는 공백 4칸을 들여쓰기 기준으로 사용한다.
+- 들여쓰기는 공백 4칸을 사용한다.
 
 ### 12.2. 중괄호 사용 규칙
 
-- 중괄호(`{`)를 열 때는 언제나 새로운 줄에 연다.
+- 타입, 메서드, 제어문의 여는 중괄호는 새 줄에 작성한다.
+- 짧은 자동 구현 프로퍼티는 한 줄로 작성할 수 있다.
 - 단일 실행문이어도 중괄호를 생략하지 않는다.
 
 좋지 않은 예:
@@ -1128,7 +1142,7 @@ if (shouldCloseWindow)
 ### 12.3. 선언 규칙
 
 - 한 줄에 변수 하나만 선언한다.
-- 메서드 선언이 한 줄에 읽기 어려울 만큼 길면 매개 변수를 한 줄에 하나씩 나눈다.
+- 메서드 선언은 한 줄을 기본으로 작성하고 줄바꿈이 필요하면 12.5절의 기준을 따른다.
 
 좋지 않은 예:
 
@@ -1168,6 +1182,42 @@ const decimal MINIMUM_ORDER_AMOUNT_WON = 19_900m;
 const long PAYMENT_TIMEOUT_MILLISECONDS = 3_000L;
 ```
 
+### 12.5. 줄바꿈과 빈 줄 규칙
+
+- 줄바꿈은 글자 수가 아니라 의미와 구조의 가독성을 기준으로 결정한다.
+- 단순한 표현식, 메서드 호출, 선언은 한 줄을 기본으로 작성한다.
+- 조건식이나 계산식을 나눌 때는 의미 단위로 나눈다.
+- 매개 변수와 인자 목록은 한눈에 파악하기 어려울 때만 나누고, 나누면 항목마다 한 줄씩 배치한다.
+- 데이터 목록은 의미 있는 묶음이나 구조가 드러나도록 배치한다.
+- 빈 줄은 논리적인 처리 단계를 구분할 때 사용한다.
+
+좋지 않은 예:
+
+```cs
+Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(order, paymentMethod, deliveryOptions,
+    notificationOptions);
+```
+
+좋은 예:
+
+```cs
+Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(order, paymentMethod, deliveryOptions, notificationOptions);
+```
+
+```cs
+Order order = CreateOrder(customerId, items, shippingAddress);
+
+SubmitOrder(
+    order,
+    paymentMethod,
+    deliveryOptions,
+    notificationOptions);
+```
+
 ## 13. 주석 작성 규칙
 
 ### 13.1. 주석 작성 원칙
@@ -1175,7 +1225,7 @@ const long PAYMENT_TIMEOUT_MILLISECONDS = 3_000L;
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
 - 공개 API에는 호출자가 알아야 하는 계약이 있을 때만 문서 주석을 작성한다.
-- 문서 주석에는 매개 변수 제약, `null` 허용 여부, 반환값, 실패 시 동작처럼 호출자가 알아야 하는 내용을 적는다.
+- 문서 주석에는 입력 제약, 반환값, 실패 시 동작 등 호출에 필요한 계약을 적는다.
 - 임시 주석, 죽은 코드, 오래된 TODO는 남기지 않는다.
 - TODO에는 담당자나 추적 가능한 이슈 번호를 함께 적는다.
 
@@ -1199,7 +1249,7 @@ if (paymentAttempt.IsRecentlySubmitted(mClock.GetCurrentInstant()))
 }
 ```
 
-TODO를 남겨야 하는 경우:
+TODO:
 
 ```cs
 // TODO(ORDER-482): Remove fallback after the legacy payment gateway is retired.
@@ -1208,13 +1258,14 @@ PaymentResult paymentResult = mPaymentGateway.ApproveOrFallback(paymentRequest);
 
 ### 13.2. 인라인 주석 규칙
 
-- 인라인 주석은 줄 끝에 길게 붙이지 않는다.
-- 코드 위에 독립된 줄로 작성한다.
+- 주석은 줄 끝에 붙이지 않고 코드 위에 독립된 줄로 작성한다.
 
 좋지 않은 예:
 
 ```cs
-if (paymentResponse.StatusCode == 409) // Payment gateway uses 409 for duplicate approval requests.
+const int PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE = 409;
+
+if (paymentResponse.StatusCode == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE) // Payment gateway uses 409 for duplicate approval requests.
 {
     return PaymentResult.DuplicateRequest();
 }
@@ -1223,8 +1274,10 @@ if (paymentResponse.StatusCode == 409) // Payment gateway uses 409 for duplicate
 좋은 예:
 
 ```cs
+const int PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE = 409;
+
 // Payment gateway uses 409 for duplicate approval requests.
-if (paymentResponse.StatusCode == 409)
+if (paymentResponse.StatusCode == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE)
 {
     return PaymentResult.DuplicateRequest();
 }
