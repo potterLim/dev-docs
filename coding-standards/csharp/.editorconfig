@@ -3,8 +3,9 @@
 #
 # Formatting, code style, and naming rules for projects that follow this repository's C# coding standard.
 #
-# This file captures rules that can be checked mechanically by the formatter, IDE, and .NET analyzers.
-# Rules that depend on intent, API meaning, member ordering, file/type matching, switch coverage, or domain-specific validation still require code review or a custom analyzer.
+# Semantic rules that these tools cannot express require code review or a custom analyzer.
+# Build-time IDE checks require EnforceCodeStyleInBuild=true in the consuming project.
+# IDE0005 also requires GenerateDocumentationFile=true for build-time analysis.
 # ============================================================
 
 root = true
@@ -30,34 +31,40 @@ trim_trailing_whitespace = false
 indent_size = 2
 
 [*.{cs,razor,cshtml}]
-# Generated files should define their own section and disable analyzers there.
-generated_code = false
 
 # ------------------------------------------------------------
 # Diagnostics
 # ------------------------------------------------------------
 
-# Remove unused using directives.
+# Unused using directives.
 dotnet_diagnostic.IDE0005.severity = error
 
-# Treat formatting violations as errors.
+# Formatting violations.
 dotnet_diagnostic.IDE0055.severity = error
 
-# Detect values that are overwritten before they are read.
+# Unnecessary value assignments.
 dotnet_diagnostic.IDE0059.severity = error
 
-# Do not expose instance fields as public or protected API.
+# Instance fields exposed as public or protected API.
 dotnet_diagnostic.CA1051.severity = error
 dotnet_code_quality.CA1051.api_surface = public
 
-# Declare public and protected types inside a namespace.
+# Public and protected types outside a namespace.
 dotnet_diagnostic.CA1050.severity = error
 
-# Do not expose mutable static fields as public or protected API.
+# Mutable static fields exposed as public or protected API.
 dotnet_diagnostic.CA2211.severity = error
 
-# Naming rule severities are defined per rule below.
-# Do not set IDE1006 globally here, because a few semantic cases intentionally remain advisory.
+# Ignored results from recognized APIs; custom APIs can use additional_use_results_methods.
+dotnet_diagnostic.CA1806.severity = error
+
+# Unawaited calls, ValueTask misuse, and missing cancellation propagation.
+dotnet_diagnostic.CS4014.severity = error
+dotnet_diagnostic.CA2012.severity = error
+dotnet_diagnostic.CA2016.severity = error
+
+# Build-time naming checks; exceptions below use severity=none.
+dotnet_diagnostic.IDE1006.severity = error
 
 # ------------------------------------------------------------
 # using directives and namespace declarations
@@ -81,37 +88,34 @@ csharp_new_line_before_else = true
 csharp_new_line_before_catch = true
 csharp_new_line_before_finally = true
 csharp_prefer_braces = true:error
-csharp_preserve_single_line_blocks = false
+
+# Preserve short auto-properties allowed by the standard.
+# Other single-line blocks still require review.
+csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = false
 
 # ------------------------------------------------------------
 # Language style
 # ------------------------------------------------------------
 
-# Prefer using blocks over using declarations.
-# This preference prevents suggestions to use using declarations, but existing declarations still require code review or a custom analyzer.
+# Disables using-declaration suggestions; existing declarations require review.
 csharp_prefer_simple_using_statement = false:error
 
-# Do not suggest converting explicit object creation to target-typed new.
-# Existing new() expressions still require code review or a custom analyzer.
+# Disables target-typed new suggestions; existing new() expressions require review.
 csharp_style_implicit_object_creation_when_type_is_apparent = false:error
 
-# The coding standard allows var only when the type is obvious, unavoidable, or clearer for LINQ/anonymous types.
-# EditorConfig cannot distinguish all semantic exceptions, so apparent-type var stays at suggestion severity.
-csharp_style_var_for_built_in_types = false:error
+# var preferences are advisory because semantic exceptions cannot be distinguished reliably.
+csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_elsewhere = false:suggestion
 csharp_style_var_when_type_is_apparent = false:suggestion
 
-# Prefer out variables declared on the previous line.
-# Existing inline out declarations may still require code review or a custom analyzer.
+# Disables inline out-variable suggestions; existing declarations require review.
 csharp_style_inlined_variable_declaration = false:error
 
-# Do not suggest converting explicit null checks into ?? expressions.
-# This does not ban every direct use of ??; direct use still needs review or a custom analyzer.
+# Disables coalescing suggestions; existing ?? expressions require review.
 dotnet_style_coalesce_expression = false:error
 
-# Object initializers are generally discouraged, but required/init-only immutable objects remain valid by the coding standard.
-# Built-in analyzers may not report existing object initializers, so keep this advisory.
+# Advisory to preserve required/init-only immutable object initializers.
 dotnet_style_object_initializer = false:suggestion
 dotnet_style_readonly_field = true:error
 
@@ -131,24 +135,19 @@ dotnet_naming_rule.interfaces_should_start_with_i.severity = error
 dotnet_naming_rule.interfaces_should_start_with_i.symbols = interfaces
 dotnet_naming_rule.interfaces_should_start_with_i.style = interface_style
 
+# Enum member names require review because built-in naming rules do not reliably target them.
 dotnet_naming_rule.enums_should_start_with_e.severity = error
 dotnet_naming_rule.enums_should_start_with_e.symbols = enums
 dotnet_naming_rule.enums_should_start_with_e.style = enum_style
 
-# Struct names are checked as PascalCase.
-# The S-prefix rule for non-readonly structs cannot be expressed precisely without conflicting with readonly structs.
+# The S-prefix rule and its readonly-struct exception require review.
 dotnet_naming_rule.struct_types_should_be_pascal_case.severity = error
 dotnet_naming_rule.struct_types_should_be_pascal_case.symbols = struct_types
 dotnet_naming_rule.struct_types_should_be_pascal_case.style = pascal_case_style
 
-# The coding standard excludes readonly struct from the S-prefix rule.
-# EditorConfig can check PascalCase here, but cannot forbid an S-prefixed readonly struct name such as SPoint.
 dotnet_naming_rule.readonly_structs_should_be_pascal_case.severity = error
 dotnet_naming_rule.readonly_structs_should_be_pascal_case.symbols = readonly_structs
 dotnet_naming_rule.readonly_structs_should_be_pascal_case.style = pascal_case_style
-
-# Enum member PascalCase is part of the coding standard, but built-in naming rules do not reliably target enum members.
-# Keep that check in code review or a custom analyzer.
 
 dotnet_naming_rule.public_methods_should_be_pascal_case.severity = error
 dotnet_naming_rule.public_methods_should_be_pascal_case.symbols = public_methods
@@ -158,8 +157,7 @@ dotnet_naming_rule.non_public_methods_should_be_camel_case.severity = error
 dotnet_naming_rule.non_public_methods_should_be_camel_case.symbols = non_public_methods
 dotnet_naming_rule.non_public_methods_should_be_camel_case.style = camel_case_style
 
-# This catches methods declared with the async modifier.
-# Methods that return Task or Task<T> without async, and async void return types, still need code review or a custom analyzer.
+# Matches the async modifier; Task-returning methods without it require review.
 dotnet_naming_rule.public_async_methods_should_end_with_async.severity = error
 dotnet_naming_rule.public_async_methods_should_end_with_async.symbols = public_async_methods
 dotnet_naming_rule.public_async_methods_should_end_with_async.style = public_async_method_style
@@ -192,7 +190,7 @@ dotnet_naming_rule.static_fields_should_start_with_s.severity = error
 dotnet_naming_rule.static_fields_should_start_with_s.symbols = static_fields
 dotnet_naming_rule.static_fields_should_start_with_s.style = static_field_style
 
-# const fields are implicitly static, so they need a more specific rule to avoid being treated as ordinary private static fields with an s prefix.
+# Private constants need a specific rule because const is implicitly static.
 dotnet_naming_rule.private_constants_should_be_uppercase.severity = error
 dotnet_naming_rule.private_constants_should_be_uppercase.symbols = private_constants
 dotnet_naming_rule.private_constants_should_be_uppercase.style = uppercase_style
@@ -201,10 +199,13 @@ dotnet_naming_rule.constants_should_be_uppercase.severity = error
 dotnet_naming_rule.constants_should_be_uppercase.symbols = constants
 dotnet_naming_rule.constants_should_be_uppercase.style = uppercase_style
 
-# Static readonly fields may be ordinary cached state or constant-like values.
-# EditorConfig cannot tell which role they serve.
-# This silent rule prevents static readonly fields from being forced into the ordinary s-prefixed static field rule; code review must decide between sName and CONSTANT_NAME.
-dotnet_naming_rule.static_readonly_fields_should_be_uppercase.severity = silent
+dotnet_naming_rule.local_constants_should_be_uppercase.severity = error
+dotnet_naming_rule.local_constants_should_be_uppercase.symbols = local_constants
+dotnet_naming_rule.local_constants_should_be_uppercase.style = uppercase_style
+
+# The role of a static readonly field determines sName or CONSTANT_NAME.
+# Disable naming diagnostics for this group and decide during review.
+dotnet_naming_rule.static_readonly_fields_should_be_uppercase.severity = none
 dotnet_naming_rule.static_readonly_fields_should_be_uppercase.symbols = static_readonly_fields
 dotnet_naming_rule.static_readonly_fields_should_be_uppercase.style = uppercase_style
 
@@ -261,6 +262,9 @@ dotnet_naming_symbols.private_constants.required_modifiers = const
 
 dotnet_naming_symbols.constants.applicable_kinds = field
 dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_symbols.local_constants.applicable_kinds = local
+dotnet_naming_symbols.local_constants.required_modifiers = const
 
 dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
 dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
