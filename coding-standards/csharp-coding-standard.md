@@ -202,6 +202,7 @@ public enum EPermissionFlags
 - 재귀 메서드는 이름 끝에 `Recursive`를 붙인다.
 - `public` 메서드 이름은 `PascalCase`를 사용한다.
 - `public` 메서드가 아닌 경우 `camelCase`를 사용한다.
+- 이벤트 핸들러 이름은 `Handle`, 대상 이름, 이벤트 이름 순서로 구성한다.
 
 좋지 않은 예:
 
@@ -210,6 +211,7 @@ public User UserById(UserId userId);
 public void Process();
 public bool Flag();
 public decimal Calculate(OrderNode orderNode);
+private void ExportButton_Click(object? senderOrNull, EventArgs eventArgs);
 ```
 
 좋은 예:
@@ -225,6 +227,10 @@ public bool ShouldRetry(PaymentAttempt paymentAttempt);
 public decimal CalculateOrderTotalRecursive(OrderNode orderNode);
 
 private User findUserById(UserId userId);
+
+private void handleExportButtonClick(object? senderOrNull, EventArgs eventArgs);
+private void handleSourcePathTextBoxTextChanged(object? senderOrNull, EventArgs eventArgs);
+public void HandleExportButtonClick(object? senderOrNull, EventArgs eventArgs);
 ```
 
 ### 3.3. 변수 이름 규칙
