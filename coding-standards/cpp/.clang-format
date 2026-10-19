@@ -4,13 +4,6 @@
 # Formatting rules for projects that follow this repository's C++ coding standard.
 #
 # Configuration targets clang-format 23.
-#
-# Style intent:
-# - Use Allman braces.
-# - Use spaces with a 4-column indentation width.
-# - Attach pointer and reference symbols to the type.
-# - Group and sort external headers before project headers.
-# - Write one constructor initializer per line.
 # ============================================================
 
 Language: Cpp
@@ -42,6 +35,7 @@ BreakStringLiterals: false
 BreakAfterReturnType: None
 BreakAfterOpenBracketFunction: true
 BreakBeforeCloseBracketFunction: false
+AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 BinPackArguments: false
 BinPackParameters: OnePerLine
@@ -50,8 +44,6 @@ BinPackParameters: OnePerLine
 # Braces
 # =========================
 BreakBeforeBraces: Allman
-
-# Keep short blocks and statements expanded.
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -144,7 +136,5 @@ ReflowComments: Never
 # =========================
 # Notes
 #
-# clang-format only controls layout. Semantic rules such as naming,
-# const-correctness, override/final usage, ownership, and API design should be
-# checked with clang-tidy and code review.
+# Semantic rules such as naming, ownership, and API design require clang-tidy or code review.
 # ============================================================
