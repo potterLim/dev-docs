@@ -162,7 +162,7 @@ EnumSet<EPermissionFlags> permissions = EnumSet.of(EPermissionFlags.READ, EPermi
 - 반환값이 있는 메서드는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `boolean` 반환 메서드는 `is`, `has`, `can`, `should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
-- 재귀 메서드는 이름 끝에 `Recursive`를 붙인다.
+- 재귀 메서드 이름에는 `Recursive` 접미사를 붙인다.
 
 좋지 않은 예:
 
@@ -705,7 +705,7 @@ String[] fileNames = new String[fileCount];
 - 내부 메서드는 이미 검증된 값을 받는다고 가정한다.
 - 내부 메서드의 사전 조건이 깨지면 즉시 실패가 드러나게 한다.
 
-- 예상 가능한 실패는 `OrNull` 메서드나 전용 결과 타입처럼 호출자가 처리할 수 있는 형태로 표현한다.
+- 예상 가능한 실패는 `OrNull` 접미사가 있는 메서드나 전용 결과 타입처럼 호출자가 처리할 수 있는 형태로 표현한다.
 - 실패 여부를 반환하는 호출은 결과를 확인한 뒤 후속 처리를 진행한다.
 - 같은 모듈에서는 일관된 오류 처리 방식을 사용한다.
 - 예외를 잡고 아무 처리 없이 무시하지 않는다.
@@ -928,8 +928,8 @@ assert (orderStatus != null) : "orderStatus must already be validated";
 - `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
   - 호출자가 값을 전달하지 않는 상황을 허용해야 할 때만 예외적으로 매개 변수에 `null`을 허용한다.
   - 조회 실패나 생성 실패처럼 반환할 결과가 없는 상황을 호출자가 처리해야 할 때만 예외적으로 `null`을 반환한다.
-- `null`을 허용하는 매개 변수 이름에는 `OrNull`을 붙인다.
-- `null`을 반환하는 메서드 이름에는 `OrNull`을 붙인다.
+- `null`을 허용하는 매개 변수 이름에는 `OrNull` 접미사를 붙인다.
+- `null`을 반환하는 메서드 이름에는 `OrNull` 접미사를 붙인다.
 - 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
 
 좋지 않은 예:
@@ -980,13 +980,29 @@ for (var order : pendingOrders) {
 }
 ```
 
-## 11. 포맷팅 규칙
+## 11. 메서드 이름의 접미사 조합 규칙
 
-### 11.1. 들여쓰기 규칙
+- 접미사를 조합할 때는 해당하는 것만 `Recursive`, `OrNull` 순서로 붙인다.
+
+좋지 않은 예:
+
+```java
+public Order findOrderOrNullRecursive(OrderNode rootNode, OrderId orderId);
+```
+
+좋은 예:
+
+```java
+public Order findOrderRecursiveOrNull(OrderNode rootNode, OrderId orderId);
+```
+
+## 12. 포맷팅 규칙
+
+### 12.1. 들여쓰기 규칙
 
 - 들여쓰기는 공백 4칸을 사용한다.
 
-### 11.2. 중괄호 사용 규칙
+### 12.2. 중괄호 사용 규칙
 
 - 여는 중괄호는 같은 줄에 둔다.
 - 닫는 중괄호는 새로운 줄에 둔다.
@@ -1020,7 +1036,7 @@ if (condition) {
 }
 ```
 
-### 11.3. 수정자 순서 규칙
+### 12.3. 수정자 순서 규칙
 
 - 접근 제어자는 다른 수정자보다 앞에 작성한다.
 - `static`은 `final`보다 앞에 작성한다.
@@ -1045,11 +1061,11 @@ public static void submitOrder(Order order) {
 private static final int RETRY_COUNT = 3;
 ```
 
-### 11.4. 선언 규칙
+### 12.4. 선언 규칙
 
 - 한 줄에 변수 하나만 선언한다.
 - 배열 선언은 자료형 쪽에 대괄호를 붙인다.
-- 메서드 선언은 한 줄을 기본으로 작성하고 줄바꿈이 필요하면 11.6절의 기준을 따른다.
+- 메서드 선언은 한 줄을 기본으로 작성하고 줄바꿈이 필요하면 12.6절의 기준을 따른다.
 
 좋지 않은 예:
 
@@ -1067,10 +1083,10 @@ int depth = image.getDepth();
 String[] fileNames = fileLoader.getFileNames();
 ```
 
-### 11.5. 리터럴 표기 규칙
+### 12.5. 리터럴 표기 규칙
 
-- `float` 리터럴에는 반드시 `f`를 붙인다.
-- `long` 리터럴에는 반드시 대문자 `L`을 사용한다.
+- `float` 리터럴에는 반드시 `f` 접미사를 붙인다.
+- `long` 리터럴에는 반드시 대문자 `L` 접미사를 붙인다.
 - 큰 숫자는 밑줄(`_`)로 자릿수를 구분할 수 있다.
 - 매직 넘버를 직접 쓰지 말고 의미 있는 상수로 분리한다.
 - 단위가 있는 숫자는 상수 이름에 단위를 드러낸다.
@@ -1091,7 +1107,7 @@ long timeoutMillis = 1_000L;
 public static final long PAYMENT_TIMEOUT_MILLIS = 3_000L;
 ```
 
-### 11.6. 줄바꿈과 빈 줄 규칙
+### 12.6. 줄바꿈과 빈 줄 규칙
 
 - 줄바꿈은 글자 수가 아니라 의미와 구조의 가독성을 기준으로 결정한다.
 - 단순한 표현식, 메서드 호출, 선언은 한 줄을 기본으로 작성한다.
@@ -1127,9 +1143,9 @@ submitOrder(
     notificationOptions);
 ```
 
-## 12. 주석 작성 규칙
+## 13. 주석 작성 규칙
 
-### 12.1. 주석 작성 원칙
+### 13.1. 주석 작성 원칙
 
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
@@ -1163,7 +1179,7 @@ TODO:
 PaymentResult paymentResult = mPaymentGateway.approveOrFallback(paymentRequest);
 ```
 
-### 12.2. 인라인 주석 규칙
+### 13.2. 인라인 주석 규칙
 
 - 주석은 줄 끝에 붙이지 않고 코드 위에 독립된 줄로 작성한다.
 
@@ -1188,7 +1204,7 @@ if (paymentResponse.getStatusCode() == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE) {
 }
 ```
 
-### 12.3. 주석보다 이름을 우선하는 규칙
+### 13.3. 주석보다 이름을 우선하는 규칙
 
 - 변수, 메서드, 타입의 의미를 설명하기 위한 주석이 필요하다면 이름을 먼저 고친다.
 

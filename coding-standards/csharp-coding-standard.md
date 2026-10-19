@@ -199,7 +199,7 @@ public enum EPermissionFlags
 - 반환값이 있는 메서드는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 메서드는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
-- 재귀 메서드는 이름 끝에 `Recursive`를 붙인다.
+- 재귀 메서드 이름에는 `Recursive` 접미사를 붙인다.
 - `public` 메서드 이름은 `PascalCase`를 사용한다.
 - `public` 메서드가 아닌 경우 `camelCase`를 사용한다.
 - 이벤트 핸들러 이름은 `Handle`, 대상 이름, 이벤트 이름 순서로 구성한다.
@@ -1003,8 +1003,8 @@ public decimal CalculateAverageUnitPrice(Order order)
 - `null`은 원칙적으로 매개 변수와 반환값에 사용하지 않는다.
   - 호출자가 값을 전달하지 않는 상황을 허용해야 할 때만 예외적으로 매개 변수에 `null`을 허용한다.
   - 조회 실패나 생성 실패처럼 반환할 결과가 없는 상황을 호출자가 처리해야 할 때만 예외적으로 `null`을 반환한다.
-- `null`을 허용하는 매개 변수 이름에는 `OrNull`을 붙인다.
-- `null`을 반환하는 메서드 이름에는 `OrNull`을 붙인다.
+- `null`을 허용하는 매개 변수 이름에는 `OrNull` 접미사를 붙인다.
+- `null`을 반환하는 메서드 이름에는 `OrNull` 접미사를 붙인다.
 - 컬렉션 반환값은 `null`이 아닌 빈 컬렉션을 반환한다.
 - `null` 병합 연산자(C# 2.0)는 사용하지 않는다.
 
@@ -1118,13 +1118,31 @@ public async Task<Receipt> SubmitOrderAsync(Order order, CancellationToken cance
 }
 ```
 
-## 12. 포맷팅 규칙
+## 12. 메서드 이름의 접미사 조합 규칙
 
-### 12.1. 들여쓰기 규칙
+- 접미사를 조합할 때는 해당하는 것만 `Recursive`, `OrNull`, `Async` 순서로 붙인다.
+
+좋지 않은 예:
+
+```cs
+public Task<decimal> CalculateOrderTotalAsyncRecursive(OrderNode orderNode, CancellationToken cancellationToken);
+public Task<User?> FindUserByIdAsyncOrNull(UserId userId, CancellationToken cancellationToken);
+```
+
+좋은 예:
+
+```cs
+public Task<decimal> CalculateOrderTotalRecursiveAsync(OrderNode orderNode, CancellationToken cancellationToken);
+public Task<User?> FindUserByIdOrNullAsync(UserId userId, CancellationToken cancellationToken);
+```
+
+## 13. 포맷팅 규칙
+
+### 13.1. 들여쓰기 규칙
 
 - 들여쓰기는 공백 4칸을 사용한다.
 
-### 12.2. 중괄호 사용 규칙
+### 13.2. 중괄호 사용 규칙
 
 - 타입, 메서드, 제어문의 여는 중괄호는 새 줄에 작성한다.
 - 짧은 자동 구현 프로퍼티는 한 줄로 작성할 수 있다.
@@ -1145,10 +1163,10 @@ if (shouldCloseWindow)
 }
 ```
 
-### 12.3. 선언 규칙
+### 13.3. 선언 규칙
 
 - 한 줄에 변수 하나만 선언한다.
-- 메서드 선언은 한 줄을 기본으로 작성하고 줄바꿈이 필요하면 12.5절의 기준을 따른다.
+- 메서드 선언은 한 줄을 기본으로 작성하고 줄바꿈이 필요하면 13.5절의 기준을 따른다.
 
 좋지 않은 예:
 
@@ -1163,7 +1181,7 @@ int width = image.Width;
 int height = image.Height;
 ```
 
-### 12.4. 리터럴 표기 규칙
+### 13.4. 리터럴 표기 규칙
 
 - `float` 리터럴에는 `f` 접미사를 붙인다.
 - `decimal` 리터럴에는 `m` 접미사를 붙인다.
@@ -1188,7 +1206,7 @@ const decimal MINIMUM_ORDER_AMOUNT_WON = 19_900m;
 const long PAYMENT_TIMEOUT_MILLISECONDS = 3_000L;
 ```
 
-### 12.5. 줄바꿈과 빈 줄 규칙
+### 13.5. 줄바꿈과 빈 줄 규칙
 
 - 줄바꿈은 글자 수가 아니라 의미와 구조의 가독성을 기준으로 결정한다.
 - 단순한 표현식, 메서드 호출, 선언은 한 줄을 기본으로 작성한다.
@@ -1224,9 +1242,9 @@ SubmitOrder(
     notificationOptions);
 ```
 
-## 13. 주석 작성 규칙
+## 14. 주석 작성 규칙
 
-### 13.1. 주석 작성 원칙
+### 14.1. 주석 작성 원칙
 
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
@@ -1262,7 +1280,7 @@ TODO:
 PaymentResult paymentResult = mPaymentGateway.ApproveOrFallback(paymentRequest);
 ```
 
-### 13.2. 인라인 주석 규칙
+### 14.2. 인라인 주석 규칙
 
 - 주석은 줄 끝에 붙이지 않고 코드 위에 독립된 줄로 작성한다.
 
@@ -1289,7 +1307,7 @@ if (paymentResponse.StatusCode == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE)
 }
 ```
 
-### 13.3. 주석보다 이름을 우선하는 규칙
+### 14.3. 주석보다 이름을 우선하는 규칙
 
 - 변수, 메서드, 타입의 의미를 설명하기 위한 주석이 필요하다면 이름을 먼저 고친다.
 

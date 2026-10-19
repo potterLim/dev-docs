@@ -310,7 +310,7 @@ inline EPermissionFlags operator|(EPermissionFlags left, EPermissionFlags right)
 - 반환값이 있는 함수는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 함수는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
-- 재귀 함수는 이름 끝에 `Recursive`를 붙인다.
+- 재귀 함수 이름에는 `Recursive` 접미사를 붙인다.
 - 공개 멤버 함수와 자유 함수 이름은 `PascalCase`를 사용한다.
 - 공개 멤버 함수가 아닌 멤버 함수 이름은 `camelCase`를 사용한다.
 
@@ -1249,6 +1249,7 @@ public:
 
 - 널 포인터는 `NULL`이나 `0`이 아니라 `nullptr`로 표현한다.
 - `nullptr`을 정상 값으로 허용하는 API는 이름이나 문서에 그 의미를 드러낸다.
+  - 반환값의 널 가능성을 이름으로 표현할 때는 `OrNull` 접미사를 사용한다.
 - 내부 함수의 필수 포인터가 `nullptr`이면 즉시 실패가 드러나게 한다.
 - 컨테이너는 가능한 한 널 포인터 대신 빈 컨테이너로 표현한다.
 
@@ -1409,13 +1410,29 @@ std::unique_ptr<OrderRepository> repository = CreateRepository();
 const auto it = orders.find(orderId);
 ```
 
-## 11. 포맷팅 규칙
+## 11. 함수 이름의 접미사 조합 규칙
 
-### 11.1. 들여쓰기 규칙
+- 접미사를 조합할 때는 해당하는 것만 `Recursive`, `OrNull` 순서로 붙인다.
+
+좋지 않은 예:
+
+```cpp
+[[nodiscard]] const Order* FindOrderOrNullRecursive(const OrderNode& rootNode, OrderId orderId);
+```
+
+좋은 예:
+
+```cpp
+[[nodiscard]] const Order* FindOrderRecursiveOrNull(const OrderNode& rootNode, OrderId orderId);
+```
+
+## 12. 포맷팅 규칙
+
+### 12.1. 들여쓰기 규칙
 
 - 들여쓰기는 공백 4칸을 사용한다.
 
-### 11.2. 중괄호 사용 규칙
+### 12.2. 중괄호 사용 규칙
 
 - 네임스페이스, 타입, 함수, 제어문의 여는 중괄호는 새 줄에 작성한다.
 - 한 줄짜리 제어문에도 중괄호를 사용한다.
@@ -1434,7 +1451,7 @@ else
 }
 ```
 
-### 11.3. 포인터와 참조 표기 규칙
+### 12.3. 포인터와 참조 표기 규칙
 
 - 포인터와 참조 기호는 타입에 붙인다.
 
@@ -1444,11 +1461,11 @@ else
 void SaveOrder(const OrderRepository& repository, const Order& order, Order* previousOrderOrNull);
 ```
 
-### 11.4. 선언 규칙
+### 12.4. 선언 규칙
 
 - 한 줄에는 하나의 변수만 선언한다.
 - 함수 선언의 반환 타입, 함수 이름, 매개 변수 목록은 한 줄을 기본으로 작성한다.
-- 함수 선언의 매개 변수 목록은 한눈에 파악하기 어려울 때 11.7절의 기준에 따라 나눈다.
+- 함수 선언의 매개 변수 목록은 한눈에 파악하기 어려울 때 12.7절의 기준에 따라 나눈다.
 
 좋지 않은 예:
 
@@ -1465,7 +1482,7 @@ const std::uint32_t height = image.GetHeight();
 void SubmitOrder(OrderId orderId, PaymentId paymentId);
 ```
 
-### 11.5. 초기화 목록 규칙
+### 12.5. 초기화 목록 규칙
 
 - 생성자 초기화 목록은 한 멤버당 한 줄로 작성한다.
 - 콜론은 생성자 선언 다음 줄에 둔다.
@@ -1482,7 +1499,7 @@ OrderService::OrderService(OrderRepository& repository, PaymentGateway& paymentG
 }
 ```
 
-### 11.6. 리터럴 표기 규칙
+### 12.6. 리터럴 표기 규칙
 
 - `float` 리터럴에는 `f` 접미사를 붙인다.
 - 큰 숫자는 읽기 쉽도록 자리 구분자를 사용한다.
@@ -1496,7 +1513,7 @@ constexpr float DEFAULT_MOVEMENT_SPEED_METERS_PER_SECOND = 1.5f;
 constexpr std::uint32_t DEFAULT_TIMEOUT_MILLISECONDS = 30'000;
 ```
 
-### 11.7. 줄바꿈과 빈 줄 규칙
+### 12.7. 줄바꿈과 빈 줄 규칙
 
 - 줄바꿈은 글자 수가 아니라 의미와 구조의 가독성을 기준으로 결정한다.
 - 단순한 표현식, 함수 호출, 선언은 한 줄을 기본으로 작성한다.
@@ -1532,9 +1549,9 @@ SubmitOrder(
     notificationOptions);
 ```
 
-## 12. 주석 작성 규칙
+## 13. 주석 작성 규칙
 
-### 12.1. 주석 작성 원칙
+### 13.1. 주석 작성 원칙
 
 - 주석은 코드가 무엇을 하는지 반복하지 않는다.
 - 코드만으로 드러나지 않는 이유, 제약, 특별한 판단, 외부 시스템의 특성을 설명한다.
@@ -1583,7 +1600,7 @@ const PaymentResult paymentResult = paymentGateway.ApproveOrFallback(paymentRequ
 [[nodiscard]] const Order* FindActiveOrderOrNull(OrderId orderId) const;
 ```
 
-### 12.2. 인라인 주석 규칙
+### 13.2. 인라인 주석 규칙
 
 - 주석은 줄 끝에 붙이지 않고 코드 위에 독립된 줄로 작성한다.
 
@@ -1610,7 +1627,7 @@ if (paymentResponse.StatusCode == PAYMENT_GATEWAY_DUPLICATE_STATUS_CODE)
 }
 ```
 
-### 12.3. 주석보다 이름을 우선하는 규칙
+### 13.3. 주석보다 이름을 우선하는 규칙
 
 - 변수, 함수, 타입의 의미를 설명하기 위한 주석이 필요하다면 이름을 먼저 고친다.
 
