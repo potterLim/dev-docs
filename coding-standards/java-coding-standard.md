@@ -229,7 +229,7 @@ boolean shouldUpdateCache;
 
 - 인스턴스 멤버 변수는 앞에 `m`을 붙이고 `PascalCase`를 사용한다.
 - `static` 멤버 변수는 앞에 `s`를 붙이고 `PascalCase`를 사용한다.
-- `boolean` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
+- `boolean` 인스턴스 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
 - 상수는 `s` 접두어를 사용하지 않고 3.5의 상수 이름 규칙을 따른다.
 
 좋은 예:

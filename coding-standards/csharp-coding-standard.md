@@ -202,6 +202,7 @@ public enum EPermissionFlags
 - 반환값이 있는 메서드는 무엇을 반환하는지가 이름에 드러나야 한다.
 - `bool` 값을 반환하는 메서드는 `Is`, `Has`, `Can`, `Should`를 우선 사용한다.
   - 이 표현이 부자연스러운 경우에는 상태를 나타내는 다른 3인칭 단수형 동사를 사용한다.
+  - 대소문자는 아래의 메서드 이름 규칙을 따른다.
 - 재귀 메서드 이름에는 `Recursive` 접미사를 붙인다.
 - `public` 메서드 이름은 `PascalCase`를 사용한다.
 - `public` 메서드가 아닌 경우 `camelCase`를 사용한다.
@@ -278,7 +279,7 @@ bool shouldUpdateCache;
 
 - `private` 인스턴스 멤버 변수는 앞에 `m`을 붙이고 `PascalCase`를 사용한다.
 - `static` 멤버 변수는 앞에 `s`를 붙이고 `PascalCase`를 사용한다.
-- `bool` 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
+- `bool` 인스턴스 멤버 변수는 `mIs`, `mHas`, `mCan`, `mShould` 형태를 우선 사용한다.
 - 상수와 상수 역할을 하는 `static readonly` 값은 `s` 접두어를 사용하지 않고 3.6의 상수 이름 규칙을 따른다.
 
 좋은 예:
